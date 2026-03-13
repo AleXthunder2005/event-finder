@@ -2,8 +2,8 @@
   /* Primary colors */
   --primary-color: #6C5CE7;
   --primary-hover-color: #5A4BD1;
-  --primary-text-color: #FFFFFF;
-  --primary-hover-text-color: #E0E0FF;
+  --primary-text-color: #252525;
+  --primary-hover-text-color: #000000;
 
   /* Secondary text */
   --secondary-text-color: #6C757D;
@@ -16,6 +16,7 @@
   /* Typography */
   --primary-font-size: 16px;
   --font-family: 'Inter', sans-serif;
+  --hover-text-font-weight: 500;
 
   /* Borders */
   --primary-border-color: #6C5CE7;
@@ -38,6 +39,10 @@
   --error-hover: #BD2130;
   --error-text-color: #FFFFFF;
   --error-hover-text-color: #FFE5E5;
+
+  /* Transitions */
+  --hover-text-transition: 0s;
+  --hover-button-transition: 0.3s ease-in-out;
 }
 
 * {
