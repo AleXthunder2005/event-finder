@@ -35,6 +35,7 @@
       "@entities/*": ["src/entities/*"],
       "@api/*": ["src/api/*"],
       "@hooks/*": ["src/hooks/*"],
+      "@helpers/*": ["src/helpers/*"],
     }
   },
   "include": ["src"]

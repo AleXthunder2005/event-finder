@@ -1,13 +1,17 @@
-import {Box, ChakraProvider} from '@chakra-ui/react'
+import {ChakraProvider} from '@chakra-ui/react'
+import Register from "@pages/Register/Register.tsx";
+import Login from "@pages/Login/Login.tsx";
+import {Navigate, Route, Routes} from "react-router-dom";
 
 function App() {
 
   return (
       <ChakraProvider>
-          <h1>Welcome to Client:</h1>
-          <Box bg='var(--primary-color)' w='100%' p={4} color='white'>
-              This is the Box
-          </Box>
+          <Routes>
+              <Route path="/" element={<Navigate to="/login" />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+          </Routes>
       </ChakraProvider>
   )
 }
