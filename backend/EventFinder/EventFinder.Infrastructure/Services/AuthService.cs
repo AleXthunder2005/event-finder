@@ -70,7 +70,7 @@ public class AuthService : IAuthService
         _db.EmailTokens.Add(tokenEntity);
         await _db.SaveChangesAsync(cancellationToken);
 
-        var verificationLink = $"{_appOptions.BaseUrl.TrimEnd('/')}/api/v1.0/auth/verify?token={rawToken}";
+        var verificationLink = $"{_appOptions.FrontendUrl.TrimEnd('/')}/email-confirmation?token={rawToken}";
 
         try
         {

@@ -101,7 +101,8 @@ namespace EventFinder.API.Controllers
 
             if (result.Success)
             {
-                return Ok(await _authService.GenerateJwtTokenAsync(token));
+                var jwtToken = await _authService.GenerateJwtTokenAsync(token);
+                return Ok(new { token = jwtToken });
             }
 
             if (result.ErrorCode == "token_expired")

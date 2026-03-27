@@ -57,7 +57,6 @@ export const RegisterPage = () => {
         try {
             await register(email, password);
             alert("Регистрация прошла успешно!");
-            navigate("/email-confirmation");
         } catch (err: any) {
             switch (err.status) {
                 case 409:

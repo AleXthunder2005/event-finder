@@ -20,7 +20,11 @@ namespace EventFinder.API
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(
+                    new System.Text.Json.Serialization.JsonStringEnumConverter());
+            }); ;
 
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -69,15 +73,21 @@ namespace EventFinder.API
                 };
             });
 
-            builder.Services.AddCors();
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
 
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
 
-            app.UseHttpsRedirection();
-
-            app.UseCors(opt => opt.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+            app.UseCors();
             app.UseAuthentication();
             app.UseAuthorization();
 
