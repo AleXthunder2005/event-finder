@@ -1,4 +1,5 @@
 ﻿using EventFinder.Domain.Entities;
+using EventFinder.Infrastructure.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventFinder.Infrastructure.Data
@@ -9,11 +10,7 @@ namespace EventFinder.Infrastructure.Data
 
         public DbSet<Document> Documents { get; set; }
 
-        public DbSet<EmailToken> EmailTokens { get; set; }
-
         public DbSet<Event> Events { get; set; }
-
-        public DbSet<Image> Images {  get; set; }
 
         public DbSet<RecommendationLog> RecommendationLogs { get; set; }
 
@@ -25,7 +22,7 @@ namespace EventFinder.Infrastructure.Data
 
         public DbSet<User> Users { get; set; }
 
-        public ApplicationDbContext(DbContextOptions dbContextOptions) : base(dbContextOptions) 
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> dbContextOptions) : base(dbContextOptions) 
         { 
            
         }

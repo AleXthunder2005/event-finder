@@ -4,19 +4,16 @@ using EventFinder.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace EventFinder.Infrastructure.Migrations
+namespace EventFinder.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260312220437_InitialCreate")]
-    partial class InitialCreate
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -77,34 +74,6 @@ namespace EventFinder.Infrastructure.Migrations
                     b.ToTable("Documents");
                 });
 
-            modelBuilder.Entity("EventFinder.Domain.Entities.EmailToken", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<int>("EmailTokenType")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("EmailTokens");
-                });
-
             modelBuilder.Entity("EventFinder.Domain.Entities.Event", b =>
                 {
                     b.Property<long>("Id")
@@ -147,23 +116,6 @@ namespace EventFinder.Infrastructure.Migrations
                     b.HasIndex("TagId");
 
                     b.ToTable("Events");
-                });
-
-            modelBuilder.Entity("EventFinder.Domain.Entities.Image", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Images");
                 });
 
             modelBuilder.Entity("EventFinder.Domain.Entities.RecommendationLog", b =>
@@ -326,17 +278,6 @@ namespace EventFinder.Infrastructure.Migrations
                 {
                     b.HasOne("EventFinder.Domain.Entities.User", "User")
                         .WithMany("Documents")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("EventFinder.Domain.Entities.EmailToken", b =>
-                {
-                    b.HasOne("EventFinder.Domain.Entities.User", "User")
-                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

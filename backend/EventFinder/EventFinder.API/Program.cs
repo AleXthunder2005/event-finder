@@ -1,5 +1,14 @@
+using EventFinder.Application.Interfaces;
 using EventFinder.Infrastructure.Data;
+using EventFinder.Infrastructure.Identity;
+using EventFinder.Infrastructure.Options;
+using EventFinder.Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace EventFinder.API
 {
@@ -20,14 +29,57 @@ namespace EventFinder.API
                     new MySqlServerVersion(new Version(8, 0, 42)))
                 );
 
+            builder.Services.AddDbContext<AppIdentityDbContext>(options =>
+                options.UseMySql(
+                    connectionString,
+                    new MySqlServerVersion(new Version(8, 0, 42)))
+                   );
+
+            builder.Services
+                .AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<AppIdentityDbContext>()
+                .AddDefaultTokenProviders();
+
+            builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
+            builder.Services.Configure<AppOptions>(builder.Configuration.GetSection("App"));
+
+            builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
+
+            var jwtOptions = builder.Configuration.GetSection("Jwt");
+            builder.Services.Configure<JwtOptions>(jwtOptions);
+            builder.Services.AddScoped<ITokenClaimsService, IdentityTokenClaimService>();
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidIssuer = jwtOptions["Issuer"],
+                    ValidAudience = jwtOptions["Audience"],
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtOptions["Key"]!))
+                };
+            });
+
+            builder.Services.AddCors();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
 
             app.UseHttpsRedirection();
 
+            app.UseCors(opt => opt.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+            app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 
