@@ -24,7 +24,7 @@ export const EmailConfirmation = () => {
                 setStatus("success");
                 setTimeout(() => {
                     navigate("/");
-                }, 1000);
+                }, 1500);
             })
             .catch((err: any) => {
                 setStatus("error");
@@ -70,8 +70,10 @@ export const EmailConfirmation = () => {
     return (
         <div className="min-h-screen flex items-center justify-center">
             <div className="text-center">
-                <h1>Email подтвержден!</h1>
-                <p className="text-muted-foreground">Перенаправление на главную...</p>
+                <h1>Регистрация прошла успешно!</h1>
+                <p className="text-muted-foreground">
+                    Email адрес успешно подтвержден. Перенаправление на главную...
+                </p>
             </div>
         </div>
     );

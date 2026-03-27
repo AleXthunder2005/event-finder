@@ -68,6 +68,7 @@ export const LoginPage = () => {
                         <input
                             type="email"
                             value={email}
+                            maxLength={100}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="Введите логин..."
                             className={`w-full px-3 py-2 border rounded-md outline-none transition ${
@@ -86,6 +87,7 @@ export const LoginPage = () => {
                             <input
                                 type={showPassword ? "text" : "password"}
                                 value={password}
+                                maxLength={40}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="Введите пароль..."
                                 className={`w-full px-3 py-2 border rounded-md outline-none transition pr-10 ${

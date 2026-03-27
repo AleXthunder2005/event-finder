@@ -108,6 +108,7 @@ export const RegisterPage = () => {
                         <input
                             type="email"
                             value={email}
+                            maxLength={100}
                             onChange={onEmailChange}
                             placeholder="Введите email..."
                             className={`w-full px-3 py-2 border rounded-md outline-none transition ${
@@ -126,6 +127,7 @@ export const RegisterPage = () => {
                             <input
                                 type={showPassword ? "text" : "password"}
                                 value={password}
+                                maxLength={40}
                                 onChange={onPasswordChange}
                                 placeholder="Введите пароль..."
                                 className={`w-full px-3 py-2 border rounded-md outline-none transition pr-10 ${
@@ -160,6 +162,7 @@ export const RegisterPage = () => {
                             <input
                                 type={showPassword ? "text" : "password"}
                                 value={repeatPassword}
+                                maxLength={40}
                                 onChange={onRepeatPasswordChange}
                                 placeholder="Повторите пароль..."
                                 className={`w-full px-3 py-2 border rounded-md outline-none transition pr-10 ${
