@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router";
+import { useParams, Link } from "react-router-dom";
 import { Calendar, Clock, MapPin, Users, Star } from "lucide-react";
 import { Header } from "../components/header";
 import { Footer } from "../components/footer";

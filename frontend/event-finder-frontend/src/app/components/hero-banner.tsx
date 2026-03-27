@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 
 export function HeroBanner() {
@@ -30,8 +30,8 @@ export function HeroBanner() {
           <Button
             asChild
             size="lg"
-            variant="outline"
-            className="border-white text-white hover:bg-white/10"
+            // variant="outline"
+            className="bg-white text-gray-900 hover:bg-white/10"
           >
             <Link to="/organizers/org1">Стать организатором</Link>
           </Button>

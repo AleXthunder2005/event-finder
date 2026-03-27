@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router";
+import { useParams, Link } from "react-router-dom";
 import { Mail, Globe, Star, Users, Calendar, AlertTriangle } from "lucide-react";
 import { Header } from "../components/header";
 import { Footer } from "../components/footer";

@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import { Event } from "../data/mock-data";
 import { Badge } from "./ui/badge";
