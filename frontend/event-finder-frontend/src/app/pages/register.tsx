@@ -17,6 +17,7 @@ export const RegisterPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [acceptedRules, setAcceptedRules] = useState(false);
 
+    // password checks
     const hasLength = password.length >= 8 && password.length <= 40;
     const hasUppercase = /[A-Z]/.test(password);
     const hasSpecial = /[!@#$%^&*()\-+=\[\]{};:'",.<>/?\\|]/.test(password);
@@ -24,7 +25,7 @@ export const RegisterPage = () => {
 
     const passwordValid = hasLength && hasUppercase && hasSpecial && hasNoSpaces;
     const emailValid = isEmailValid(email);
-    const passwordsMatch = password === repeatPassword && password !== "";
+    const passwordsMatch = password !== "" && repeatPassword !== "" && password === repeatPassword;
 
     const formValid = emailValid && passwordValid && passwordsMatch && acceptedRules;
 
@@ -37,23 +38,17 @@ export const RegisterPage = () => {
         } else if (!emailValid) {
             setEmailError("Некорректный формат email");
             hasError = true;
-        } else {
-            setEmailError("");
-        }
+        } else setEmailError("");
 
         if (!passwordValid) {
             setPasswordError("Пароль не соответствует требованиям");
             hasError = true;
-        } else {
-            setPasswordError("");
-        }
+        } else setPasswordError("");
 
         if (!passwordsMatch) {
             setRepeatPasswordError("Пароли не совпадают");
             hasError = true;
-        } else {
-            setRepeatPasswordError("");
-        }
+        } else setRepeatPasswordError("");
 
         if (!acceptedRules) hasError = true;
 
@@ -61,7 +56,7 @@ export const RegisterPage = () => {
 
         try {
             await register(email, password);
-            alert("Регистрация прошла успешно! Подтвердите email.");
+            alert("Регистрация прошла успешно!");
             navigate("/email-confirmation");
         } catch (err: any) {
             switch (err.status) {
@@ -77,20 +72,44 @@ export const RegisterPage = () => {
         }
     };
 
+    const onEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setEmail(value);
+        if (!value) setEmailError("");
+        else if (!isEmailValid(value)) setEmailError("Некорректный формат email");
+        else setEmailError("");
+    };
+
+    const onPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setPassword(value);
+        setPasswordError("");
+        if (repeatPassword && value !== repeatPassword) setRepeatPasswordError("Пароли не совпадают");
+        else setRepeatPasswordError("");
+    };
+
+    const onRepeatPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setRepeatPassword(value);
+        if (password && value !== password) setRepeatPasswordError("Пароли не совпадают");
+        else setRepeatPasswordError("");
+    };
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-background">
             <div className="w-[420px] bg-white rounded-xl shadow-md p-6">
                 <h2 className="text-xl font-medium text-center mb-4 text-[var(--primary-text-color)]">
                     Регистрация
                 </h2>
+
                 <div className="space-y-4">
-                    {/* Email */}
+                    {/* EMAIL */}
                     <div>
                         <label className="block mb-1 text-[var(--primary-text-color)]">Email</label>
                         <input
                             type="email"
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={onEmailChange}
                             placeholder="Введите email..."
                             className={`w-full px-3 py-2 border rounded-md outline-none transition ${
                                 emailError
@@ -101,14 +120,14 @@ export const RegisterPage = () => {
                         {emailError && <p className="text-sm text-red-500 mt-1">{emailError}</p>}
                     </div>
 
-                    {/* Password */}
+                    {/* PASSWORD */}
                     <div>
                         <label className="block mb-1 text-[var(--primary-text-color)]">Пароль</label>
                         <div className="relative">
                             <input
                                 type={showPassword ? "text" : "password"}
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={onPasswordChange}
                                 placeholder="Введите пароль..."
                                 className={`w-full px-3 py-2 border rounded-md outline-none transition pr-10 ${
                                     passwordError
@@ -127,26 +146,41 @@ export const RegisterPage = () => {
                         {passwordError && <p className="text-sm text-red-500 mt-1">{passwordError}</p>}
                     </div>
 
-                    {/* Repeat password */}
-                    <div>
-                        <label className="block mb-1 text-[var(--primary-text-color)]">Повторите пароль</label>
-                        <input
-                            type={showPassword ? "text" : "password"}
-                            value={repeatPassword}
-                            onChange={(e) => setRepeatPassword(e.target.value)}
-                            placeholder="Повторите пароль..."
-                            className={`w-full px-3 py-2 border rounded-md outline-none transition ${
-                                repeatPasswordError
-                                    ? "border-red-500 focus:ring-1 focus:ring-red-500"
-                                    : "border-gray-300 focus:ring-1 focus:ring-indigo-500 hover:border-indigo-400"
-                            }`}
-                        />
-                        {repeatPasswordError && (
-                            <p className="text-sm text-red-500 mt-1">{repeatPasswordError}</p>
-                        )}
+                    {/* PASSWORD CHECKLIST */}
+                    <div className="text-sm space-y-1">
+                        <p className={hasLength ? "text-green-600" : "text-gray-400"}>• 8-40 символов</p>
+                        <p className={hasUppercase ? "text-green-600" : "text-gray-400"}>• минимум 1 заглавная буква</p>
+                        <p className={hasSpecial ? "text-green-600" : "text-gray-400"}>• минимум 1 спецсимвол</p>
+                        <p className={hasNoSpaces ? "text-green-600" : "text-gray-400"}>• без пробелов</p>
                     </div>
 
-                    {/* Rules */}
+                    {/* REPEAT PASSWORD */}
+                    <div>
+                        <label className="block mb-1 text-[var(--primary-text-color)]">Повторите пароль</label>
+                        <div className="relative">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                value={repeatPassword}
+                                onChange={onRepeatPasswordChange}
+                                placeholder="Повторите пароль..."
+                                className={`w-full px-3 py-2 border rounded-md outline-none transition pr-10 ${
+                                    repeatPasswordError
+                                        ? "border-red-500 focus:ring-1 focus:ring-red-500"
+                                        : "border-gray-300 focus:ring-1 focus:ring-indigo-500 hover:border-indigo-400"
+                                }`}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute cursor-pointer right-2 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-black"
+                            >
+                                {showPassword ? "🙈" : "👁"}
+                            </button>
+                        </div>
+                        {repeatPasswordError && <p className="text-sm text-red-500 mt-1">{repeatPasswordError}</p>}
+                    </div>
+
+                    {/* CHECKBOX */}
                     <label className="flex items-start gap-2 text-sm">
                         <input
                             type="checkbox"
@@ -166,6 +200,7 @@ export const RegisterPage = () => {
             </span>
                     </label>
 
+                    {/* SUBMIT */}
                     <button
                         disabled={!formValid}
                         onClick={onSubmitClick}
@@ -177,6 +212,14 @@ export const RegisterPage = () => {
                     >
                         Зарегистрироваться
                     </button>
+
+                    {/* LOGIN LINK */}
+                    <p className="text-center text-sm text-[var(--primary-text-color)] pt-2">
+                        Уже есть аккаунт?{" "}
+                        <a href="/login" className="text-[var(--primary-color)] hover:underline font-medium">
+                            Войти
+                        </a>
+                    </p>
                 </div>
             </div>
         </div>

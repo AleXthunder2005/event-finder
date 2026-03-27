@@ -24,16 +24,12 @@ export const LoginPage = () => {
         } else if (!isEmailValid(email)) {
             setEmailError("Неверный формат email");
             hasError = true;
-        } else {
-            setEmailError("");
-        }
+        } else setEmailError("");
 
         if (!password) {
             setPasswordError("Введите пароль");
             hasError = true;
-        } else {
-            setPasswordError("");
-        }
+        } else setPasswordError("");
 
         if (hasError) return;
 
@@ -64,10 +60,9 @@ export const LoginPage = () => {
     return (
         <div className="min-h-screen flex items-center justify-center bg-background">
             <div className="w-[400px] bg-white rounded-xl shadow-md p-6">
-                <h2 className="text-xl font-medium text-center mb-4 text-[var(--primary-text-color)]">
-                    Вход
-                </h2>
+                <h2 className="text-xl font-medium text-center mb-4 text-[var(--primary-text-color)]">Вход</h2>
                 <div className="space-y-4">
+                    {/* EMAIL */}
                     <div>
                         <label className="block mb-1 text-[var(--primary-text-color)]">Логин</label>
                         <input
@@ -84,6 +79,7 @@ export const LoginPage = () => {
                         {emailError && <p className="text-sm text-red-500 mt-1">{emailError}</p>}
                     </div>
 
+                    {/* PASSWORD */}
                     <div>
                         <label className="block mb-1 text-[var(--primary-text-color)]">Пароль</label>
                         <div className="relative">
@@ -115,6 +111,19 @@ export const LoginPage = () => {
                     >
                         Войти
                     </button>
+
+                    {/* LINKS */}
+                    <div className="text-center text-sm space-y-1 pt-2">
+                        <a href="/forgot-password" className="text-[var(--primary-color)] hover:text-[var(--primary-hover-color)]">
+                            Забыли пароль?
+                        </a>
+                        <p className="text-[var(--primary-text-color)]">
+                            Нет аккаунта?{" "}
+                            <a href="/register" className="text-[var(--primary-color)] hover:text-[var(--primary-hover-color)] font-medium">
+                                Создать аккаунт
+                            </a>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
