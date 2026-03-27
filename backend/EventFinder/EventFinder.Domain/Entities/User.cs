@@ -26,6 +26,6 @@ namespace EventFinder.Domain.Entities
 
         public List<Document>? Documents { get; set; }
 
-        public List<Registration> Registrations { get; set; } = null!;
+        public List<Registration> Registrations { get; set; } = [];
     }
 }
