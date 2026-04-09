@@ -143,10 +143,11 @@ export function ProfilePage() {
 
                     <div className="flex items-center gap-4">
                       <Avatar className="h-20 w-20">
-                        <AvatarImage src="https://images.unsplash.com/photo-1712168567852-ea607c2d3177?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXJzb24lMjBhdmF0YXIlMjBwb3J0cmFpdCUyMHByb2Zlc3Npb25hbHxlbnwxfHx8fDE3NzM0MDY0NDd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" alt="Александр" />
+                        {/*<AvatarImage src="https://images.unsplash.com/photo-1712168567852-ea607c2d3177?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXJzb24lMjBhdmF0YXIlMjBwb3J0cmFpdCUyMHByb2Zlc3Npb25hbHxlbnwxfHx8fDE3NzM0MDY0NDd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" alt="Александр" />*/}
+                        <AvatarImage src={"https://static.vecteezy.com/system/resources/previews/019/879/198/non_2x/user-icon-on-transparent-background-free-png.png"} alt="Александр" className="object-contain"/>
                         <AvatarFallback>А</AvatarFallback>
                       </Avatar>
-                      <Button variant="outline">Изменить фото</Button>
+                      <Button variant="outline" className="hover:cursor-pointer">Изменить фото</Button>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -168,7 +169,7 @@ export function ProfilePage() {
                       </div>
                     </div>
 
-                    <Button style={{ backgroundColor: 'var(--primary-color)' }}>
+                    <Button style={{ backgroundColor: 'var(--primary-color)'}} className="hover:cursor-pointer hover:opacity-90 w-full">
                       Сохранить изменения
                     </Button>
                   </div>

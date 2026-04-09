@@ -60,7 +60,7 @@ export function Header({ isAuthenticated = false, userName = "Пользоват
           </nav>
 
           {/* User Section */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 cursor-pointer">
             {!isAuthenticated ? (
               <Button
                 asChild
@@ -107,6 +107,20 @@ export function Header({ isAuthenticated = false, userName = "Пользоват
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+
+/*                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="hidden md:flex items-center space-x-2 p-2 border">
+                      <User className="h-5 w-5" />
+                      <span>{userName}</span>
+                    </button>
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent>
+                    <DropdownMenuItem>Test Item 1</DropdownMenuItem>
+                    <DropdownMenuItem>Test Item 2</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>*/
             )}
 
             {/* Mobile Menu Button */}

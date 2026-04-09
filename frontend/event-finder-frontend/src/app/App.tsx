@@ -13,7 +13,8 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 const PrivateHome = () => {
   const { isAuthenticated } = useAuth();
 
-  return isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />;
+  // return isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />;
+  return <HomePage/>;
 };
 
 export default function App() {
@@ -27,7 +28,7 @@ export default function App() {
             <Route path="/" element={<PrivateHome />} />
             {/* <Route path="/events/:id" element={<EventDetailPage />} /> */}
             {/* <Route path="/organizers/:id" element={<OrganizerPage />} /> */}
-            {/* <Route path="/profile" element={<ProfilePage />} /> */}
+             <Route path="/profile" element={<ProfilePage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </BrowserRouter>

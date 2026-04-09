@@ -23,7 +23,7 @@ export function HeroBanner() {
           <Button
             onClick={scrollToEvents}
             size="lg"
-            className="bg-white text-gray-900 hover:bg-gray-100"
+            className="bg-white text-gray-900 hover:bg-gray-100/80 cursor-pointer"
           >
             Смотреть мероприятия
           </Button>
@@ -31,7 +31,7 @@ export function HeroBanner() {
             asChild
             size="lg"
             // variant="outline"
-            className="bg-white text-gray-900 hover:bg-white/10"
+            className="bg-white text-gray-900 hover:bg-gray-100/80"
           >
             <Link to="/organizers/org1">Стать организатором</Link>
           </Button>
