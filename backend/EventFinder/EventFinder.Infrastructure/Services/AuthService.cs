@@ -1,5 +1,6 @@
 ﻿using EventFinder.Application.DTOs;
 using EventFinder.Application.Interfaces;
+using EventFinder.Domain.Entities;
 using EventFinder.Domain.Enums;
 using EventFinder.Infrastructure.Identity;
 using EventFinder.Infrastructure.Options;
@@ -19,6 +20,7 @@ public class AuthService : IAuthService
     private readonly IEmailSender _emailSender;
     private readonly AppOptions _appOptions;
     private readonly ITokenClaimsService _tokenClaimsService;
+    private readonly IRepository<User> _userRepository;
 
     public AuthService(
         UserManager<ApplicationUser> userManager,
@@ -124,6 +126,89 @@ public class AuthService : IAuthService
         user.EmailConfirmed = true;
         user.EmailVerifiedAtUtc = DateTime.UtcNow;
 
+        var userProfile = new User();
+        await _userRepository.AddAsync(userProfile);
+
+        user.UserId = userProfile.Id;
+        await _userManager.UpdateAsync(user);
+
+        await _db.SaveChangesAsync(cancellationToken);
+
+        return ServiceResult.Ok("Email успешно подтверждён.");
+    }
+
+    public async Task<ServiceResult> ResetPasswordAsync(string email, CancellationToken cancellationToken = default)
+    {
+        var existingUser = await _userManager.FindByEmailAsync(email);
+        if (existingUser == null)
+            return ServiceResult.NotFound("Пользователь не найден.");
+
+        var rawToken = GenerateToken();
+        var tokenHash = HashToken(rawToken);
+
+        var tokenEntity = new EmailToken
+        {
+            UserId = existingUser.Id,
+            Token = tokenHash,
+            EmailTokenType = EmailTokenType.Reset,
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddHours(24)
+        };
+
+        _db.EmailTokens.Add(tokenEntity);
+        await _db.SaveChangesAsync(cancellationToken);
+
+        var verificationLink = $"{_appOptions.FrontendUrl.TrimEnd('/')}/forgot-password?token={rawToken}";
+
+        try
+        {
+            await _emailSender.SendResetPasswordEmailAsync(existingUser.Email, verificationLink, cancellationToken);
+        }
+        catch
+        {
+            _db.EmailTokens.Remove(tokenEntity);
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return ServiceResult.MailSendFail("email_send_failed", "Не удалось отправить письмо подтверждения.");
+        }
+
+        return ServiceResult.Ok("Регистрация успешна. Проверьте email для подтверждения аккаунта.");
+    }
+
+    public async Task<ServiceResult> ChangePasswordAsync(string token, string newPassword, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+            return ServiceResult.Fail("token_invalid", "token invalid");
+
+        var tokenHash = HashToken(token);
+
+        var tokenEntity = await _db.EmailTokens
+            .Include(x => x.User)
+            .FirstOrDefaultAsync(x => x.Token == tokenHash && x.EmailTokenType == EmailTokenType.Reset, cancellationToken);
+
+        if (tokenEntity == null)
+            return ServiceResult.Fail("token_invalid", "token invalid");
+
+        if (tokenEntity.ExpiresAt <= DateTime.UtcNow)
+        {
+            _db.EmailTokens.Remove(tokenEntity);
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return ServiceResult.Fail("token_expired", "token expired");
+        }
+
+        var user = tokenEntity.User;
+        if (user == null)
+        {
+            _db.EmailTokens.Remove(tokenEntity);
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return ServiceResult.Fail("token_invalid", "token invalid");
+        }
+
+        await _userManager.RemovePasswordAsync(user);
+        await _userManager.AddPasswordAsync(user, newPassword);
+
         await _userManager.UpdateAsync(user);
 
         await _db.SaveChangesAsync(cancellationToken);
@@ -151,7 +236,7 @@ public class AuthService : IAuthService
             return null;
         }
 
-        string jwt = _tokenClaimsService.GetToken(emailToken.User.Id);
+        string jwt = _tokenClaimsService.GetToken(emailToken.User.Id, emailToken.User.UserId.ToString());
         _db.EmailTokens.Remove(emailToken);
         await _db.SaveChangesAsync();
 

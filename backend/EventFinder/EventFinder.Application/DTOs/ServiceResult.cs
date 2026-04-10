@@ -3,6 +3,7 @@
     public record ServiceResult(bool Success, string Message, string? ErrorCode = null)
     {
         public ServiceResultCode ResultCode { get; set; }
+
         public static ServiceResult Ok(string message) 
         {
             var result = new ServiceResult(true, message) { ResultCode = ServiceResultCode.Ok };
@@ -26,6 +27,12 @@
             var result = new ServiceResult(false, message, errorCode) { ResultCode = ServiceResultCode.MailSendFail };
             return result;
         }
+
+        public static ServiceResult NotFound(string message)
+        {
+            var result = new ServiceResult(false, message, "") { ResultCode = ServiceResultCode.NotFound };
+            return result;
+        }
     }
 
     public enum ServiceResultCode
@@ -33,6 +40,7 @@
         Ok,
         Conflict,
         MailSendFail,
-        Fail
+        Fail,
+        NotFound
     }
 }

@@ -1,7 +1,9 @@
 ﻿using EventFinder.Application.DTOs;
 using EventFinder.Application.Interfaces;
+using EventFinder.Domain.Entities;
 using EventFinder.Infrastructure.Identity;
 using EventFinder.Infrastructure.Options;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -20,6 +22,8 @@ namespace EventFinder.API.Controllers
 
         private readonly IOptions<AppOptions> _appOptions;
 
+        private readonly IRepository<User> _userRepository;
+
         public AuthController(UserManager<ApplicationUser> userManager, ITokenClaimsService tokenService, IAuthService authService, IOptions<AppOptions> appOptions)
         {
             _userManager = userManager;
@@ -27,29 +31,6 @@ namespace EventFinder.API.Controllers
             _authService = authService;
             _appOptions = appOptions;
         }
-
-        //[HttpPost("register")]
-        //public async Task<IActionResult> Register([FromBody] RegisterRequest request)
-        //{
-        //    var existingUser = await _userManager.FindByNameAsync(request.Email);
-        //    if (existingUser != null)
-        //    {
-        //        return Conflict(new { message = "User already exists" });
-        //    }
-
-        //    var user = new ApplicationUser()
-        //    { 
-        //        Email = request.Email 
-        //    };
-        //    var result = await _userManager.CreateAsync(user, request.Password);
-
-        //    if (!result.Succeeded)
-        //    {
-        //        return BadRequest();
-        //    }
-
-        //    return StatusCode(StatusCodes.Status201Created);
-        //}
 
         [HttpPost("register")]
         public async Task<ActionResult> Register(RegisterRequest request, CancellationToken cancellationToken)
@@ -90,7 +71,7 @@ namespace EventFinder.API.Controllers
                 return Unauthorized();
             }
 
-            var token = _tokenService.GetToken(user.Id);
+            var token = _tokenService.GetToken(user.Id, user.UserId.ToString());
             return Ok(new { token });
         }
 
@@ -102,6 +83,52 @@ namespace EventFinder.API.Controllers
             if (result.Success)
             {
                 var jwtToken = await _authService.GenerateJwtTokenAsync(token);
+                return Ok(new { token = jwtToken });
+            }
+
+            if (result.ErrorCode == "token_expired")
+            {
+                return StatusCode(StatusCodes.Status410Gone, new
+                {
+                    error = result.ErrorCode,
+                    message = result.Message
+                });
+            }
+
+            return BadRequest(new
+            {
+                error = result.ErrorCode,
+                message = result.Message
+            });
+        }
+
+        [Authorize]
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] string email, CancellationToken cancellationToken)
+        {
+            var result = await _authService.ResetPasswordAsync(email, cancellationToken);
+
+            if (!result.Success)
+            {
+                if (result.ResultCode == ServiceResultCode.NotFound)
+                {
+                    return NotFound();
+                }
+
+                return BadRequest();
+            }
+
+            return Ok();
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ChangePassword(ResetPasswodRequest resetPasswodRequest, CancellationToken cancellationToken)
+        {
+            var result = await _authService.ChangePasswordAsync(resetPasswodRequest.Token, resetPasswodRequest.NewPassword, cancellationToken);
+
+            if (result.Success)
+            {
+                var jwtToken = await _authService.GenerateJwtTokenAsync(resetPasswodRequest.Token);
                 return Ok(new { token = jwtToken });
             }
 

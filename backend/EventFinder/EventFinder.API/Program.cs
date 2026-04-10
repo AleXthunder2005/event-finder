@@ -1,12 +1,13 @@
 using EventFinder.Application.Interfaces;
+using EventFinder.Application.Services;
 using EventFinder.Infrastructure.Data;
+using EventFinder.Infrastructure.Data.Repositories;
 using EventFinder.Infrastructure.Identity;
 using EventFinder.Infrastructure.Options;
 using EventFinder.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -19,6 +20,11 @@ namespace EventFinder.API
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+
+            builder.Services.AddScoped(typeof(IRepository<>), typeof(RepositoryBase<>));
+            builder.Services.AddScoped<IEventService, EventService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IReviewService, ReviewService>();
 
             builder.Services.AddControllers().AddJsonOptions(options =>
             {

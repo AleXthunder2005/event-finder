@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
+    <ProjectReference Include="..\EventFinder.Domain\EventFinder.Domain.csproj" />
   </ItemGroup>
 
 </Project>

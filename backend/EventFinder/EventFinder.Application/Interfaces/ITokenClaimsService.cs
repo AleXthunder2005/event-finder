@@ -2,6 +2,6 @@
 {
     public interface ITokenClaimsService
     {
-        string GetToken(string userId);
+        string GetToken(string userId, string profileId);
     }
 }

@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using EventFinder.Application.Common;
 
 namespace EventFinder.Infrastructure.Identity
 {
@@ -20,11 +21,11 @@ namespace EventFinder.Infrastructure.Identity
             _options = options.Value;
         }
 
-        public string GetToken(string userId)
+        public string GetToken(string userId, string profileId)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_options.Key);
-            var claims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier, userId) };
+            var claims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier, userId), new Claim(Constants.ProfileIdClaimName, profileId) };
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

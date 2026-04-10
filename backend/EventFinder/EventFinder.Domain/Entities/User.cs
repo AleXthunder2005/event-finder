@@ -4,10 +4,6 @@ namespace EventFinder.Domain.Entities
 {
     public class User : Entity
     {
-        public string Email {  get; set; } = string.Empty;
-
-        public byte[] PasswordHash { get; set; }
-
         public Role Role { get; set; }
 
         public string DisplayName { get; set; } = string.Empty;
