@@ -9,6 +9,8 @@ import { RegisterPage } from "./pages/register";
 import { EmailConfirmation } from "./pages/emailConfirmation";
 import { NotFoundPage } from "./pages/not-found";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import {YMaps} from "@pbe/react-yandex-maps";
+import {ResetPasswordPage} from "./pages/reset-password";
 
 const PrivateHome = () => {
   const { isAuthenticated } = useAuth();
@@ -19,19 +21,22 @@ const PrivateHome = () => {
 
 export default function App() {
   return (
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/email-confirmation" element={<EmailConfirmation />} />
-            <Route path="/" element={<PrivateHome />} />
-            {/* <Route path="/events/:id" element={<EventDetailPage />} /> */}
-            {/* <Route path="/organizers/:id" element={<OrganizerPage />} /> */}
-             <Route path="/profile" element={<ProfilePage />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
+      <YMaps>
+          <AuthProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/email-confirmation" element={<EmailConfirmation />} />
+                <Route path="/" element={<PrivateHome />} />
+                {/* <Route path="/events/:id" element={<EventDetailPage />} /> */}
+                {/* <Route path="/organizers/:id" element={<OrganizerPage />} /> */}
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </BrowserRouter>
+          </AuthProvider>
+      </YMaps>
   );
 }

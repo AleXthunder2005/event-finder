@@ -60,3 +60,40 @@ export async function login(email: string, password: string): Promise<AuthRespon
 
     return await response.json();
 }
+
+
+// ------------------ FORGOT PASSWORD ------------------
+export async function forgotPassword(email: string): Promise<void> {
+    const response = await fetch(`${SERVER_URL}/api/v1.0/auth/forgot-password`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+        const error = new Error(`${response.status}`);
+        // @ts-ignore
+        error.status = response.status;
+        throw error;
+    }
+}
+
+// ------------------ RESET PASSWORD ------------------
+export async function resetPassword(token: string, newPassword: string): Promise<void> {
+    const response = await fetch(`${SERVER_URL}/api/v1.0/auth/reset-password`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token, newPassword }),
+    });
+
+    if (!response.ok) {
+        const error = new Error(`${response.status}`);
+        // @ts-ignore
+        error.status = response.status;
+        throw error;
+    }
+}
