@@ -24,24 +24,23 @@ namespace EventFinder.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("EventFinder.Domain.Entities.Comment", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<long>("EventId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("EventId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
 
@@ -54,18 +53,15 @@ namespace EventFinder.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("EventFinder.Domain.Entities.Document", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
 
@@ -76,11 +72,8 @@ namespace EventFinder.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("EventFinder.Domain.Entities.Event", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
 
                     b.Property<int>("Capacity")
                         .HasColumnType("int");
@@ -96,14 +89,8 @@ namespace EventFinder.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<long>("OrganizerId")
-                        .HasColumnType("bigint");
-
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<long>("TagId")
-                        .HasColumnType("bigint");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -111,29 +98,24 @@ namespace EventFinder.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrganizerId");
-
-                    b.HasIndex("TagId");
-
                     b.ToTable("Events");
                 });
 
             modelBuilder.Entity("EventFinder.Domain.Entities.RecommendationLog", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("EventId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("EventId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
 
                     b.Property<int>("Score")
                         .HasColumnType("int");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
 
@@ -146,11 +128,11 @@ namespace EventFinder.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("EventFinder.Domain.Entities.Registration", b =>
                 {
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(255)");
 
-                    b.Property<long>("EventId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("EventId")
+                        .HasColumnType("varchar(255)");
 
                     b.Property<DateTime>("RegistrationDate")
                         .HasColumnType("datetime(6)");
@@ -164,20 +146,21 @@ namespace EventFinder.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("EventFinder.Domain.Entities.Review", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("char(36)");
 
-                    b.Property<long>("AuthorId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("AuthorId1")
+                        .HasColumnType("varchar(255)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<long>("OrganizerId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("OrganizerId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
 
                     b.Property<int>("Rating")
                         .HasColumnType("int");
@@ -188,7 +171,7 @@ namespace EventFinder.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AuthorId");
+                    b.HasIndex("AuthorId1");
 
                     b.HasIndex("OrganizerId");
 
@@ -197,11 +180,8 @@ namespace EventFinder.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("EventFinder.Domain.Entities.Tag", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
 
@@ -210,11 +190,8 @@ namespace EventFinder.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("EventFinder.Domain.Entities.User", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("AvatarUrl")
                         .IsRequired()
@@ -230,16 +207,8 @@ namespace EventFinder.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<DateTime>("LastLoginAt")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<byte[]>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("longblob");
 
                     b.Property<int>("ReputationScore")
                         .HasColumnType("int");
@@ -278,30 +247,9 @@ namespace EventFinder.Infrastructure.Data.Migrations
                 {
                     b.HasOne("EventFinder.Domain.Entities.User", "User")
                         .WithMany("Documents")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("EventFinder.Domain.Entities.Event", b =>
-                {
-                    b.HasOne("EventFinder.Domain.Entities.User", "Organizer")
-                        .WithMany()
-                        .HasForeignKey("OrganizerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EventFinder.Domain.Entities.Tag", "Tag")
-                        .WithMany()
-                        .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Organizer");
-
-                    b.Navigation("Tag");
                 });
 
             modelBuilder.Entity("EventFinder.Domain.Entities.RecommendationLog", b =>
@@ -346,9 +294,7 @@ namespace EventFinder.Infrastructure.Data.Migrations
                 {
                     b.HasOne("EventFinder.Domain.Entities.User", "Author")
                         .WithMany()
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AuthorId1");
 
                     b.HasOne("EventFinder.Domain.Entities.User", "Organizer")
                         .WithMany()

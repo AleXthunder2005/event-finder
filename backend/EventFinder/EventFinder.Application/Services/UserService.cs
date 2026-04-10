@@ -20,7 +20,7 @@ namespace EventFinder.Application.Services
             );
         }
 
-        public async Task<User?> GetUserByIdAsync(long id)
+        public async Task<User?> GetUserByIdAsync(Guid id)
         {
             return await _userRepository.GetByIdAsync(id,
                 u => u.Documents,
@@ -35,7 +35,7 @@ namespace EventFinder.Application.Services
             return created;
         }
 
-        public async Task<User?> UpdateUserAsync(long id, User updatedUser)
+        public async Task<User?> UpdateUserAsync(Guid id, User updatedUser)
         {
             var existing = await _userRepository.GetByIdAsync(id);
             if (existing == null)
@@ -54,7 +54,7 @@ namespace EventFinder.Application.Services
             return existing;
         }
 
-        public async Task<bool> DeleteUserAsync(long id)
+        public async Task<bool> DeleteUserAsync(Guid id)
         {
             var existing = await _userRepository.GetByIdAsync(id);
             if (existing == null)

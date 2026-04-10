@@ -18,24 +18,27 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../components/ui/alert-dialog";
-import { mockEvents } from "../data/mock-data";
 import { EventCard } from "../components/event-card";
 import { Map } from "@pbe/react-yandex-maps";
 import { useAuth } from "../context/AuthContext";
 import { profileService, ProfileData } from "../services/profileServise";
 import { reviewsService, UserReview } from "../services/reviewsService";
 import { ReviewItem } from "../components/review-item";
+import { eventsService } from "../services/eventsService";
+import { EventEntity } from "../entities/event.types";
 
 export function ProfilePage() {
   const { token, logout, userId } = useAuth();
   const [activeTab, setActiveTab] = useState("personal");
   const [deletePassword, setDeletePassword] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [userReviews, setUserReviews] = useState<UserReview[]>([]);
+  const [userEvents, setUserEvents] = useState<EventEntity[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [eventsLoading, setEventsLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -46,7 +49,9 @@ export function ProfilePage() {
 
   useEffect(() => {
     if (token && userId) {
+      profileService.setUserId(userId);
       reviewsService.setCurrentUserId(userId);
+      eventsService.setCurrentUserId(userId);
       loadProfile();
     }
   }, [token, userId]);
@@ -68,9 +73,12 @@ export function ProfilePage() {
         biography: userProfile.biography,
       });
 
-      // Загружаем отзывы пользователя
+      // Загружаем отзывы и мероприятия пользователя параллельно
       if (userId) {
-        await loadUserReviews();
+        await Promise.all([
+          loadUserReviews(),
+          loadUserEvents()
+        ]);
       }
     } catch (err: any) {
       console.error("Failed to load profile:", err);
@@ -94,6 +102,20 @@ export function ProfilePage() {
       console.error("Failed to load reviews:", err);
     } finally {
       setReviewsLoading(false);
+    }
+  };
+
+  const loadUserEvents = async () => {
+    if (!token) return;
+
+    setEventsLoading(true);
+    try {
+      const events = await eventsService.getUserRegisteredEvents(token);
+      setUserEvents(events);
+    } catch (err: any) {
+      console.error("Failed to load user events:", err);
+    } finally {
+      setEventsLoading(false);
     }
   };
 
@@ -146,8 +168,6 @@ export function ProfilePage() {
       }
     }
   };
-
-  const userEvents = mockEvents.slice(0, 2);
 
   if (loading) {
     return (
@@ -381,7 +401,11 @@ export function ProfilePage() {
                           </p>
                         </div>
 
-                        {userEvents.length > 0 ? (
+                        {eventsLoading ? (
+                            <div className="flex justify-center py-12">
+                              <Loader2 className="h-8 w-8 animate-spin text-[var(--primary-color)]" />
+                            </div>
+                        ) : userEvents.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                               {userEvents.map((event) => (
                                   <EventCard key={event.id} event={event} />

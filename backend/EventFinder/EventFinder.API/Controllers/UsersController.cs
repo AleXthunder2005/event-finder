@@ -20,8 +20,8 @@ namespace EventFinder.API.Controllers
             return Ok(users);
         }
 
-        [HttpGet("{id:long}")]
-        public async Task<ActionResult<User>> GetById(long id)
+        [HttpGet("{id:Guid}")]
+        public async Task<ActionResult<User>> GetById(Guid id)
         {
             var user = await _userService.GetUserByIdAsync(id);
             if (user == null)
@@ -36,8 +36,8 @@ namespace EventFinder.API.Controllers
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
-        [HttpPut("{id:long}")]
-        public async Task<ActionResult<User>> Update(long id, User updatedUser)
+        [HttpPut("{id:Guid}")]
+        public async Task<ActionResult<User>> Update(Guid id, User updatedUser)
         {
             var result = await _userService.UpdateUserAsync(id, updatedUser);
             if (result == null)
@@ -45,8 +45,8 @@ namespace EventFinder.API.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("{id:long}")]
-        public async Task<IActionResult> Delete(long id)
+        [HttpDelete("{id:Guid}")]
+        public async Task<IActionResult> Delete(Guid id)
         {
             var deleted = await _userService.DeleteUserAsync(id);
             if (!deleted)

@@ -1,6 +1,6 @@
 ﻿namespace EventFinder.Application.DTOs
 {
-    public class ResetPasswodRequest
+    public class ResetPasswodResponse
     {
         public string Token { get; set; }
 

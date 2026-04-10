@@ -20,8 +20,8 @@ namespace EventFinder.API.Controllers
             return Ok(events);
         }
 
-        [HttpGet("{id:long}")]
-        public async Task<ActionResult<Event>> GetById(long id)
+        [HttpGet("{id:Guid}")]
+        public async Task<ActionResult<Event>> GetById(Guid id)
         {
             var @event = await _eventService.GetEventByIdAsync(id);
             if (@event == null)
@@ -32,16 +32,16 @@ namespace EventFinder.API.Controllers
         [HttpPost]
         public async Task<ActionResult<Event>> Create(Event @event)
         {
-            var created = await _eventService.CreateEventAsync(@event, long.Parse(UserId));
+            var created = await _eventService.CreateEventAsync(@event, Guid.Parse(UserId));
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
-        [HttpPut("{id:long}")]
-        public async Task<ActionResult<Event>> Update(long id, Event updatedEvent)
+        [HttpPut("{id:Guid}")]
+        public async Task<ActionResult<Event>> Update(Guid id, Event updatedEvent)
         {
             try
             {
-                var result = await _eventService.UpdateEventAsync(id, updatedEvent, long.Parse(UserId));
+                var result = await _eventService.UpdateEventAsync(id, updatedEvent, Guid.Parse(UserId));
                 if (result == null)
                     return NotFound();
                 return Ok(result);
@@ -52,12 +52,12 @@ namespace EventFinder.API.Controllers
             }
         }
 
-        [HttpDelete("{id:long}")]
-        public async Task<IActionResult> Delete(long id)
+        [HttpDelete("{id:Guid}")]
+        public async Task<IActionResult> Delete(Guid id)
         {
             try
             {
-                var deleted = await _eventService.DeleteEventAsync(id, long.Parse(UserId));
+                var deleted = await _eventService.DeleteEventAsync(id, Guid.Parse(UserId));
                 if (!deleted)
                     return NotFound();
                 return NoContent();

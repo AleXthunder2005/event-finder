@@ -15,8 +15,8 @@ import {ResetPasswordPage} from "./pages/reset-password";
 const PrivateHome = () => {
   const { isAuthenticated } = useAuth();
 
-  // return isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />;
-  return <HomePage/>;
+  return isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />;
+  //return <HomePage/>;
 };
 
 export default function App() {

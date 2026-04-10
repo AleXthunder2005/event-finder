@@ -1,6 +1,7 @@
 ﻿using EventFinder.Domain.Entities;
 using EventFinder.Infrastructure.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace EventFinder.Infrastructure.Data
 {
@@ -29,6 +30,18 @@ namespace EventFinder.Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Registration>().HasKey(r => new { r.UserId, r.EventId });
+
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                var idProperty = entityType.FindProperty("Id");
+                if (idProperty != null && idProperty.ClrType == typeof(Guid))
+                {
+                    modelBuilder.Entity(entityType.ClrType)
+                        .Property<Guid>("Id")
+                        .HasColumnType("CHAR(36)")
+                        .HasConversion<GuidToStringConverter>();
+                }
+            }
             //modelBuilder.Entity<Registration>()
             //    .HasOne(r => r.User)
             //    .WithMany(u => u.Registrations);

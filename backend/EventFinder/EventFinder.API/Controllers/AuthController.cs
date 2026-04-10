@@ -24,12 +24,13 @@ namespace EventFinder.API.Controllers
 
         private readonly IRepository<User> _userRepository;
 
-        public AuthController(UserManager<ApplicationUser> userManager, ITokenClaimsService tokenService, IAuthService authService, IOptions<AppOptions> appOptions)
+        public AuthController(UserManager<ApplicationUser> userManager, ITokenClaimsService tokenService, IAuthService authService, IOptions<AppOptions> appOptions, IRepository<User> userRepostiory)
         {
             _userManager = userManager;
             _tokenService = tokenService;
             _authService = authService;
             _appOptions = appOptions;
+            _userRepository = userRepostiory;
         }
 
         [HttpPost("register")]
@@ -71,7 +72,7 @@ namespace EventFinder.API.Controllers
                 return Unauthorized();
             }
 
-            var token = _tokenService.GetToken(user.Id, user.UserId.ToString());
+            var token = _tokenService.GetToken(user.Id, user.UserProfileId.ToString());
             return Ok(new { token });
         }
 
@@ -102,11 +103,10 @@ namespace EventFinder.API.Controllers
             });
         }
 
-        [Authorize]
         [HttpPost("forgot-password")]
-        public async Task<IActionResult> ResetPassword([FromBody] string email, CancellationToken cancellationToken)
+        public async Task<IActionResult> ResetPassword(ResetPasswordRequest request, CancellationToken cancellationToken)
         {
-            var result = await _authService.ResetPasswordAsync(email, cancellationToken);
+            var result = await _authService.ResetPasswordAsync(request.Email, cancellationToken);
 
             if (!result.Success)
             {
@@ -122,7 +122,7 @@ namespace EventFinder.API.Controllers
         }
 
         [HttpPost("reset-password")]
-        public async Task<IActionResult> ChangePassword(ResetPasswodRequest resetPasswodRequest, CancellationToken cancellationToken)
+        public async Task<IActionResult> ChangePassword(ResetPasswodResponse resetPasswodRequest, CancellationToken cancellationToken)
         {
             var result = await _authService.ChangePasswordAsync(resetPasswodRequest.Token, resetPasswodRequest.NewPassword, cancellationToken);
 

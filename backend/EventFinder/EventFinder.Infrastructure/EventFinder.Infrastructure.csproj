@@ -21,4 +21,9 @@
     <ProjectReference Include="..\EventFinder.Domain\EventFinder.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\Migrations\" />
+    <Folder Include="Identity\Migrations\" />
+  </ItemGroup>
+
 </Project>

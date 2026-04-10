@@ -7,8 +7,8 @@ namespace EventFinder.API.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/[controller]")]
-    public abstract class BaseApiController : ControllerBase
+    [Route("api/v1.0/[controller]")]
+    public class BaseApiController : ControllerBase
     {
         protected string UserId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 

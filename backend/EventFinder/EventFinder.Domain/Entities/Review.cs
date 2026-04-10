@@ -2,11 +2,11 @@
 {
     public class Review : Entity
     {
-        public long OrganizerId { get; set; }
+        public string OrganizerId { get; set; }
 
         public User Organizer { get; set; } = null!;
 
-        public long AuthorId { get; set; }
+        public Guid AuthorId { get; set; }
 
         public User Author { get; set; } = null!;
 

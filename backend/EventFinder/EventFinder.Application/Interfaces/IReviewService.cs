@@ -5,9 +5,9 @@ namespace EventFinder.Application.Interfaces
     public interface IReviewService
     {
         Task<IEnumerable<Review>> GetAllReviewsAsync();
-        Task<Review?> GetReviewByIdAsync(long id);
-        Task<Review> CreateReviewAsync(Review review, long authorId);
-        Task<Review?> UpdateReviewAsync(long id, Review updatedReview, long userId);
-        Task<bool> DeleteReviewAsync(long id, long userId);
+        Task<Review?> GetReviewByIdAsync(Guid id);
+        Task<Review> CreateReviewAsync(Review review, Guid authorId);
+        Task<Review?> UpdateReviewAsync(Guid id, Review updatedReview, Guid userId);
+        Task<bool> DeleteReviewAsync(Guid id, Guid userId);
     }
 }

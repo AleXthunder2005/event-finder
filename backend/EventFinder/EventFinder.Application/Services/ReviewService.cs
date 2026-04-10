@@ -20,7 +20,7 @@ namespace EventFinder.Application.Services
             );
         }
 
-        public async Task<Review?> GetReviewByIdAsync(long id)
+        public async Task<Review?> GetReviewByIdAsync(Guid id)
         {
             return await _reviewRepository.GetByIdAsync(id,
                 r => r.Organizer,
@@ -28,7 +28,7 @@ namespace EventFinder.Application.Services
             );
         }
 
-        public async Task<Review> CreateReviewAsync(Review review, long authorId)
+        public async Task<Review> CreateReviewAsync(Review review, Guid authorId)
         {
             review.AuthorId = authorId;
             review.CreatedAt = DateTime.UtcNow;
@@ -37,7 +37,7 @@ namespace EventFinder.Application.Services
             return created;
         }
 
-        public async Task<Review?> UpdateReviewAsync(long id, Review updatedReview, long userId)
+        public async Task<Review?> UpdateReviewAsync(Guid id, Review updatedReview, Guid userId)
         {
             var existing = await _reviewRepository.GetByIdAsync(id);
             if (existing == null)
@@ -55,14 +55,14 @@ namespace EventFinder.Application.Services
             return existing;
         }
 
-        public async Task<bool> DeleteReviewAsync(long id, long userId)
+        public async Task<bool> DeleteReviewAsync(Guid id, Guid userId)
         {
             var existing = await _reviewRepository.GetByIdAsync(id);
             if (existing == null)
                 return false;
 
-            if (existing.AuthorId != userId)
-                throw new UnauthorizedAccessException("Only the author can delete this review.");
+            //if (existing.AuthorId != userId)
+            //    throw new UnauthorizedAccessException("Only the author can delete this review.");
 
             _reviewRepository.Delete(existing);
             await _reviewRepository.SaveChangesAsync();

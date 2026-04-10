@@ -15,12 +15,12 @@ namespace EventFinder.Infrastructure.Data.Repositories
             _dbSet = context.Set<T>();
         }
 
-        public async Task<T?> GetByIdAsync(long id, params Expression<Func<T, object>>[] includes)
+        public async Task<T?> GetByIdAsync(Guid id, params Expression<Func<T, object>>[] includes)
         {
             IQueryable<T> query = _dbSet;
             foreach (var include in includes)
                 query = query.Include(include);
-            return await query.FirstOrDefaultAsync(e => EF.Property<long>(e, "Id") == id);
+            return await query.FirstOrDefaultAsync(e => EF.Property<Guid>(e, "Id") == id);
         }
 
         public async Task<IEnumerable<T>> GetAllAsync(params Expression<Func<T, object>>[] includes)

@@ -27,13 +27,15 @@ public class AuthService : IAuthService
         AppIdentityDbContext db,
         IEmailSender emailSender,
         IOptions<AppOptions> appOptions,
-        ITokenClaimsService tokenClaimsService)
+        ITokenClaimsService tokenClaimsService,
+        IRepository<User> userRepostiory)
     {
         _userManager = userManager;
         _db = db;
         _emailSender = emailSender;
         _appOptions = appOptions.Value;
         _tokenClaimsService = tokenClaimsService;
+        _userRepository = userRepostiory;
     }
 
     public async Task<ServiceResult> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
@@ -129,7 +131,7 @@ public class AuthService : IAuthService
         var userProfile = new User();
         await _userRepository.AddAsync(userProfile);
 
-        user.UserId = userProfile.Id;
+        user.UserProfileId = userProfile.Id;
         await _userManager.UpdateAsync(user);
 
         await _db.SaveChangesAsync(cancellationToken);
@@ -158,7 +160,7 @@ public class AuthService : IAuthService
         _db.EmailTokens.Add(tokenEntity);
         await _db.SaveChangesAsync(cancellationToken);
 
-        var verificationLink = $"{_appOptions.FrontendUrl.TrimEnd('/')}/forgot-password?token={rawToken}";
+        var verificationLink = $"{_appOptions.FrontendUrl.TrimEnd('/')}/reset-password?token={rawToken}";
 
         try
         {
@@ -236,7 +238,7 @@ public class AuthService : IAuthService
             return null;
         }
 
-        string jwt = _tokenClaimsService.GetToken(emailToken.User.Id, emailToken.User.UserId.ToString());
+        string jwt = _tokenClaimsService.GetToken(emailToken.User.Id, emailToken.User.UserProfileId.ToString());
         _db.EmailTokens.Remove(emailToken);
         await _db.SaveChangesAsync();
 
