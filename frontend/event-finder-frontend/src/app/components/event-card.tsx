@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 import { Calendar, Clock, MapPin } from "lucide-react";
-import { Event } from "../data/mock-data";
 import { Badge } from "./ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { EventEntity } from '../entities/event.types'
 
 interface EventCardProps {
-  event: Event;
+  event: EventEntity;
   compact?: boolean;
 }
 
@@ -16,53 +16,53 @@ export function EventCard({ event, compact = false }: EventCardProps) {
   };
 
   return (
-    <Link
-      to={`/events/${event.id}`}
-      className="group block bg-card rounded-lg overflow-hidden border hover:shadow-lg transition-all duration-300"
-      style={{ transition: 'var(--hover-button-transition)' }}
-    >
-      {/* Image */}
-      <div className="relative overflow-hidden aspect-[16/9]">
-        <img
-          src={event.image}
-          alt={event.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-        />
-        <Badge
-          className="absolute top-3 right-3"
-          style={{ backgroundColor: 'var(--primary-color)' }}
-        >
-          {event.category}
-        </Badge>
-      </div>
-
-      {/* Content */}
-      <div className={compact ? "p-3 space-y-3" : "p-4 space-y-3"}>
-        <h3 className={compact ? "text-base" : ""}>{event.title}</h3>
-
-        <div className="space-y-2 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            <span>{formatDate(event.date)}</span>
-            <Clock className="h-4 w-4 ml-2" />
-            <span>{event.time}</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4" />
-            <span className="line-clamp-1">{event.location}</span>
-          </div>
+      <Link
+          to={`/events/${event.id}`}
+          className="group block bg-card rounded-lg overflow-hidden border hover:shadow-lg transition-all duration-300"
+          style={{ transition: 'var(--hover-button-transition)' }}
+      >
+        {/* Image */}
+        <div className="relative overflow-hidden aspect-[16/9]">
+          <img
+              src={event.image}
+              alt={event.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+          <Badge
+              className="absolute top-3 right-3"
+              style={{ backgroundColor: 'var(--primary-color)' }}
+          >
+            {event.category}
+          </Badge>
         </div>
 
-        {/* Organizer */}
-        <div className="flex items-center gap-2 pt-2 border-t">
-          <Avatar className="h-6 w-6">
-            <AvatarImage src={event.organizerAvatar} alt={event.organizerName} />
-            <AvatarFallback>{event.organizerName[0]}</AvatarFallback>
-          </Avatar>
-          <span className="text-sm text-muted-foreground">{event.organizerName}</span>
+        {/* Content */}
+        <div className={compact ? "p-3 space-y-3" : "p-4 space-y-3"}>
+          <h3 className={compact ? "text-base" : ""}>{event.title}</h3>
+
+          <div className="space-y-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              <span>{formatDate(event.date)}</span>
+              <Clock className="h-4 w-4 ml-2" />
+              <span>{event.time}</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              <span className="line-clamp-1">{event.location}</span>
+            </div>
+          </div>
+
+          {/* Organizer */}
+          <div className="flex items-center gap-2 pt-2 border-t">
+            <Avatar className="h-6 w-6">
+              <AvatarImage src={event.organizerAvatar} alt={event.organizerName} />
+              <AvatarFallback>{event.organizerName[0]}</AvatarFallback>
+            </Avatar>
+            <span className="text-sm text-muted-foreground">{event.organizerName}</span>
+          </div>
         </div>
-      </div>
-    </Link>
+      </Link>
   );
 }

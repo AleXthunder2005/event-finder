@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { User, Calendar, MessageSquare, Settings, AlertTriangle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { User, Calendar, MessageSquare, Settings, AlertTriangle, Loader2 } from "lucide-react";
 import { Header } from "../components/header";
 import { Footer } from "../components/footer";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import {
   AlertDialog,
@@ -20,42 +20,165 @@ import {
 } from "../components/ui/alert-dialog";
 import { mockEvents } from "../data/mock-data";
 import { EventCard } from "../components/event-card";
-import {Map} from "@pbe/react-yandex-maps";
-
-// Mock user profile data
-const mockUserProfile = {
-  firstName: "Александр",
-  lastName: "Иванов",
-  fullName: "Александр",
-  email: "alexander@example.com",
-  phone: "+7 (999) 123-45-67",
-  avatarUrl: "https://static.vecteezy.com/system/resources/previews/019/879/198/non_2x/user-icon-on-transparent-background-free-png.png",
-  userEvents: mockEvents.slice(0, 2),
-  biography: "Люблю путешествия, фотографию и активный отдых. Организую мероприятия для единомышленников.",
-};
+import { Map } from "@pbe/react-yandex-maps";
+import { useAuth } from "../context/AuthContext";
+import { profileService, ProfileData } from "../services/profileServise";
+import { reviewsService, UserReview } from "../services/reviewsService";
+import { ReviewItem } from "../components/review-item";
 
 export function ProfilePage() {
+  const { token, logout, userId } = useAuth();
   const [activeTab, setActiveTab] = useState("personal");
   const [deletePassword, setDeletePassword] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [userReviews, setUserReviews] = useState<UserReview[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: mockUserProfile.firstName,
-    lastName: mockUserProfile.lastName,
-    email: mockUserProfile.email,
-    phone: mockUserProfile.phone,
-    biography: mockUserProfile.biography,
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    biography: "",
   });
+
+  useEffect(() => {
+    if (token && userId) {
+      reviewsService.setCurrentUserId(userId);
+      loadProfile();
+    }
+  }, [token, userId]);
+
+  const loadProfile = async () => {
+    if (!token) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const userProfile = await profileService.getProfile(token);
+      setProfile(userProfile);
+      setFormData({
+        firstName: userProfile.firstName,
+        lastName: userProfile.lastName,
+        email: userProfile.email,
+        phone: userProfile.phone,
+        biography: userProfile.biography,
+      });
+
+      // Загружаем отзывы пользователя
+      if (userId) {
+        await loadUserReviews();
+      }
+    } catch (err: any) {
+      console.error("Failed to load profile:", err);
+      setError("Не удалось загрузить данные профиля");
+      if (err.status === 401) {
+        logout();
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadUserReviews = async () => {
+    if (!token || !userId) return;
+
+    setReviewsLoading(true);
+    try {
+      const reviews = await reviewsService.getUserReviews(userId, token);
+      setUserReviews(reviews);
+    } catch (err: any) {
+      console.error("Failed to load reviews:", err);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
   };
 
-  // Mock user data
-  const userEvents = mockUserProfile.userEvents;
+  const handleSaveProfile = async () => {
+    if (!token) return;
+
+    setSaving(true);
+    setError(null);
+
+    try {
+      const updatedProfile = await profileService.updateProfile(token, {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        biography: formData.biography,
+      });
+
+      setProfile(updatedProfile);
+      alert("Профиль успешно обновлен!");
+    } catch (err: any) {
+      console.error("Failed to update profile:", err);
+      setError("Не удалось сохранить изменения");
+      if (err.status === 401) {
+        logout();
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteProfile = async () => {
+    if (!token) return;
+
+    try {
+      await profileService.deleteProfile(token, deletePassword);
+      alert("Профиль успешно удален");
+      logout();
+    } catch (err: any) {
+      console.error("Failed to delete profile:", err);
+      if (err.status === 401) {
+        alert("Неверный пароль");
+      } else {
+        alert("Не удалось удалить профиль");
+      }
+    }
+  };
+
+  const userEvents = mockEvents.slice(0, 2);
+
+  if (loading) {
+    return (
+        <div className="min-h-screen flex flex-col">
+          <Header isAuthenticated={true} userName="Загрузка..." />
+          <main className="flex-1 bg-muted/30 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-[var(--primary-color)]" />
+          </main>
+          <Footer />
+        </div>
+    );
+  }
+
+  if (error || !profile) {
+    return (
+        <div className="min-h-screen flex flex-col">
+          <Header isAuthenticated={true} userName="Ошибка" />
+          <main className="flex-1 bg-muted/30 flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-red-500 mb-4">{error || "Произошла ошибка"}</p>
+              <Button onClick={loadProfile}>Попробовать снова</Button>
+            </div>
+          </main>
+          <Footer />
+        </div>
+    );
+  }
 
   return (
       <div className="min-h-screen flex flex-col">
-        <Header isAuthenticated={true} userName={mockUserProfile.fullName} />
+        <Header isAuthenticated={true} userName={profile.fullName} />
         <main className="flex-1 bg-muted/30">
           <div className="container mx-auto px-4 py-8">
             <h1 className="mb-8">Профиль</h1>
@@ -146,6 +269,7 @@ export function ProfilePage() {
                             <AlertDialogAction
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 disabled={!deletePassword}
+                                onClick={handleDeleteProfile}
                             >
                               Удалить профиль
                             </AlertDialogAction>
@@ -168,8 +292,8 @@ export function ProfilePage() {
 
                         <div className="flex items-center gap-4">
                           <Avatar className="h-20 w-20">
-                            <AvatarImage src={mockUserProfile.avatarUrl} alt={mockUserProfile.fullName} className="object-contain"/>
-                            <AvatarFallback>{mockUserProfile.firstName[0]}</AvatarFallback>
+                            <AvatarImage src={profile.avatarUrl} alt={profile.fullName} className="object-contain"/>
+                            <AvatarFallback>{profile.firstName[0]}</AvatarFallback>
                           </Avatar>
                           <Button variant="outline" className="hover:cursor-pointer">Изменить фото</Button>
                         </div>
@@ -237,8 +361,13 @@ export function ProfilePage() {
                           </div>
                         </div>
 
-                        <Button style={{ backgroundColor: 'var(--primary-color)'}} className="hover:cursor-pointer hover:opacity-90 w-full">
-                          Сохранить изменения
+                        <Button
+                            style={{ backgroundColor: 'var(--primary-color)'}}
+                            className="hover:cursor-pointer hover:opacity-90 w-full"
+                            onClick={handleSaveProfile}
+                            disabled={saving}
+                        >
+                          {saving ? "Сохранение..." : "Сохранить изменения"}
                         </Button>
                       </div>
                   )}
@@ -275,9 +404,21 @@ export function ProfilePage() {
                           </p>
                         </div>
 
-                        <div className="text-center py-12 text-muted-foreground">
-                          У вас пока нет отзывов
-                        </div>
+                        {reviewsLoading ? (
+                            <div className="flex justify-center py-12">
+                              <Loader2 className="h-8 w-8 animate-spin text-[var(--primary-color)]" />
+                            </div>
+                        ) : userReviews.length > 0 ? (
+                            <div className="space-y-4">
+                              {userReviews.map((review) => (
+                                  <ReviewItem key={review.id} review={review} />
+                              ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-12 text-muted-foreground">
+                              У вас пока нет отзывов
+                            </div>
+                        )}
                       </div>
                   )}
 
@@ -355,6 +496,7 @@ export function ProfilePage() {
                                   <AlertDialogAction
                                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                       disabled={!deletePassword}
+                                      onClick={handleDeleteProfile}
                                   >
                                     Удалить профиль
                                   </AlertDialogAction>

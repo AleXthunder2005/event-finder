@@ -1,20 +1,20 @@
 import { Star } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Review } from "../data/mock-data";
+import { ReviewEntity } from "../entities/review.types";
 
 interface ReviewItemProps {
-  review: Review;
+  review: ReviewEntity;
 }
 
 export function ReviewItem({ review }: ReviewItemProps) {
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }).map((_, i) => (
-      <Star
-        key={i}
-        className={`h-4 w-4 ${
-          i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
-        }`}
-      />
+        <Star
+            key={i}
+            className={`h-4 w-4 ${
+                i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+            }`}
+        />
     ));
   };
 
@@ -28,25 +28,25 @@ export function ReviewItem({ review }: ReviewItemProps) {
   };
 
   return (
-    <div className="border rounded-lg p-4">
-      <div className="flex items-start gap-3">
-        <Avatar>
-          <AvatarImage src={review.userAvatar} alt={review.userName} />
-          <AvatarFallback>{review.userName[0]}</AvatarFallback>
-        </Avatar>
-        <div className="flex-1">
-          <div className="flex items-center justify-between mb-2">
-            <h4>{review.userName}</h4>
-            <span className="text-sm text-muted-foreground">
+      <div className="border rounded-lg p-4">
+        <div className="flex items-start gap-3">
+          <Avatar>
+            <AvatarImage src={review.userAvatar} alt={review.userName} />
+            <AvatarFallback>{review.userName[0]}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-2">
+              <h4>{review.userName}</h4>
+              <span className="text-sm text-muted-foreground">
               {formatDate(review.date)}
             </span>
+            </div>
+            <div className="flex items-center gap-1 mb-2">
+              {renderStars(review.rating)}
+            </div>
+            <p className="text-sm text-muted-foreground">{review.comment}</p>
           </div>
-          <div className="flex items-center gap-1 mb-2">
-            {renderStars(review.rating)}
-          </div>
-          <p className="text-sm text-muted-foreground">{review.comment}</p>
         </div>
       </div>
-    </div>
   );
 }

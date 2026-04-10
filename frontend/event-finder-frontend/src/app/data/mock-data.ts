@@ -1,51 +1,6 @@
-export interface Event {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  time: string;
-  location: string;
-  address: string;
-  category: string;
-  image: string;
-  images: string[];
-  organizerId: string;
-  organizerName: string;
-  organizerAvatar: string;
-  availableSpots: number;
-  totalSpots: number;
-  coordinates: {
-    lat: number;
-    lng: number;
-  };
-}
 
-export interface Organizer {
-  id: string;
-  name: string;
-  avatar: string;
-  logo: string;
-  description: string;
-  email: string;
-  website: string;
-  rating: number;
-  reviewCount: number;
-  followers: number;
-  eventsCount: number;
-  joinDate: string;
-}
 
-export interface Review {
-  id: string;
-  userId: string;
-  userName: string;
-  userAvatar: string;
-  rating: number;
-  comment: string;
-  date: string;
-}
-
-export const mockEvents: Event[] = [
+export const mockEvents: any[] = [
   {
     id: "1",
     title: "Мастер-класс по фотографии",
@@ -168,7 +123,7 @@ export const mockEvents: Event[] = [
   }
 ];
 
-export const mockOrganizers: Organizer[] = [
+export const mockOrganizers: any[] = [
   {
     id: "org1",
     name: "Студия CreativeSpace",
@@ -213,7 +168,7 @@ export const mockOrganizers: Organizer[] = [
   }
 ];
 
-export const mockReviews: Review[] = [
+export const mockReviews: any[] = [
   {
     id: "1",
     userId: "u1",
