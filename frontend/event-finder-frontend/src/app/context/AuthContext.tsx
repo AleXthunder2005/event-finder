@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import {profileService} from "../services/profileServise";
+import {eventsService} from "../services/eventsService";
+import {reviewsService} from "../services/reviewsService";
 
 interface AuthContextType {
     token: string | null;
@@ -13,8 +15,11 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
     token: null,
     isAuthenticated: false,
-    userName: "Пользователь",
     userId: null,
+
+
+
+    userName: "Пользователь",
     login: () => {},
     logout: () => {},
 });
@@ -40,11 +45,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [userId, setUserId] = useState<string | null>(null);
 
     useEffect(() => {
-        // Восстанавливаем токен из localStorage при загрузке
+/*        // Восстанавливаем токен из localStorage при загрузке
         const savedToken = localStorage.getItem("token");
         if (savedToken) {
             login(savedToken);
-        }
+        }*/
+
+        setToken("asd");
+        setUserId("aaaa");
+        profileService.setUserId("aaaa");
+        eventsService.setCurrentUserId("aaaa");
+        reviewsService.setCurrentUserId("aaaa");
+
     }, []);
 
     const login = (newToken: string) => {
@@ -57,6 +69,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUserName(decoded.name || "Пользователь");
             setUserId(decoded.profileId);
             profileService.setUserId(decoded.profileId);
+            eventsService.setCurrentUserId(decoded.profileId);
+            reviewsService.setCurrentUserId(decoded.profileId);
         }
     };
 

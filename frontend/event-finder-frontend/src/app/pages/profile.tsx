@@ -345,6 +345,7 @@ export function ProfilePage() {
                                 value={formData.email}
                                 onChange={handleInputChange}
                                 className="mt-2"
+                                disabled
                             />
                           </div>
                           <div>
