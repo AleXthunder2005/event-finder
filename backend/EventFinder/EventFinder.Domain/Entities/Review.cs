@@ -2,18 +2,20 @@
 {
     public class Review : Entity
     {
-        public string OrganizerId { get; set; }
+        public string EventId { get; set; }
 
-        public User Organizer { get; set; } = null!;
-
-        public Guid AuthorId { get; set; }
-
-        public User Author { get; set; } = null!;
+        public string UserId { get; set; }
 
         public int Rating { get; set; }
 
-        public string Text { get; set; } = string.Empty;
+        public string Comment { get; set; } = string.Empty;
 
-        public DateTime CreatedAt { get; set; }
+        public DateTime Date { get; set; }
+
+        // navigation
+
+        public Event Event { get; set; } = null!;
+
+        public User User { get; set; } = null!;
     }
 }

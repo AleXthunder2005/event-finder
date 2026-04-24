@@ -1,13 +1,14 @@
-﻿using EventFinder.Domain.Entities;
+﻿using EventFinder.Application.DTOs;
+using EventFinder.Domain.Entities;
 
 namespace EventFinder.Application.Interfaces
 {
     public interface IUserService
     {
-        Task<IEnumerable<User>> GetAllUsersAsync();
-        Task<User?> GetUserByIdAsync(Guid id);
-        Task<User> CreateUserAsync(User user);
-        Task<User?> UpdateUserAsync(Guid id, User updatedUser);
-        Task<bool> DeleteUserAsync(Guid id);
+        Task<IEnumerable<ProfileDto>> GetAllUsersAsync();
+        Task<ProfileDto?> GetUserByIdAsync(Guid id);
+        Task<ProfileDto> CreateUserAsync(ProfileDto dto);
+        Task<ProfileDto?> UpdateUserAsync(Guid id, ProfileDto dto);
+        Task<bool> DeleteUserAsync(Guid id, string password);
     }
 }

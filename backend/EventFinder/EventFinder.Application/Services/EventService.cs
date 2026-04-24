@@ -1,4 +1,6 @@
-﻿using EventFinder.Application.Interfaces;
+﻿using AutoMapper;
+using EventFinder.Application.DTOs;
+using EventFinder.Application.Interfaces;
 using EventFinder.Domain.Entities;
 
 namespace EventFinder.Application.Services
@@ -6,72 +8,150 @@ namespace EventFinder.Application.Services
     public class EventService : IEventService
     {
         private readonly IRepository<Event> _eventRepository;
+        private readonly IRepository<Registration> _registratoinRepository;
 
-        public EventService(IRepository<Event> eventRepository)
+        private readonly IMapper _mapper;
+
+        public EventService(IRepository<Event> eventRepository, IMapper mapper, IRepository<Registration> registrationRepostiory)
         {
             _eventRepository = eventRepository;
+            _registratoinRepository = registrationRepostiory;
+            _mapper = mapper;
         }
 
-        public async Task<IEnumerable<Event>> GetAllEventsAsync()
+        public async Task<IEnumerable<EventDto>> GetAllEventsAsync(Guid? currentUserId = null)
         {
-            return await _eventRepository.GetAllAsync(
-                //e => e.Organizer,
-                //e => e.Tag,
-                //e => e.Registrations
-            );
+            var events = await _eventRepository.GetAllAsync(e => e.Registrations);
+            var dtos = new List<EventDto>();
+
+            foreach (var @event in events)
+            {
+                var dto = _mapper.Map<EventDto>(@event);
+                if (@event.Registrations.FirstOrDefault(r => r.UserId == currentUserId.ToString()) != null)
+                {
+                    dto.AmIMember = false;
+                }
+                dtos.Add(dto);
+            }
+
+            return dtos;
         }
 
-        public async Task<Event?> GetEventByIdAsync(Guid id)
+        public async Task<IEnumerable<EventDto>> GetEventsByOrganizerAsync(Guid organizerId)
         {
-            return await _eventRepository.GetByIdAsync(id
-                //e => e.Organizer,
-                //e => e.Tag,
-                //e => e.Registrations
-            );
+            var events = await _eventRepository.GetAllAsync(e => e.OrganizerId == organizerId);
+            return _mapper.Map<IEnumerable<EventDto>>(events);
         }
 
-        public async Task<Event> CreateEventAsync(Event @event, Guid organizerId)
+        public async Task<IEnumerable<EventDto>> GetUserRegisteredEventsAsync(Guid userId)
         {
-            //@event.OrganizerId = organizerId;
-            var created = await _eventRepository.AddAsync(@event);
+            var events = await _eventRepository.GetAllAsync(e => e.Registrations);
+            var dtos = new List<EventDto>();
+
+            foreach (var @event in events)
+            {
+                var dto = _mapper.Map<EventDto>(@event);
+                if (@event.Registrations.FirstOrDefault(r => r.UserId == userId.ToString()) == null)
+                {
+                    dto.AmIMember = false;
+                }
+                dtos.Add(dto);
+            }
+            return dtos;
+        }
+
+        public async Task<EventDto?> GetEventByIdAsync(Guid id, Guid? currentUserId = null)
+        {
+            var entity = await _eventRepository.GetByIdAsync(id, e => e.Registrations);
+            if (entity == null) return null;
+            var dto = _mapper.Map<EventDto>(entity);
+            if (entity.Registrations.FirstOrDefault(r => r.UserId == currentUserId.ToString()) != null)
+            {
+                dto.AmIMember = true;
+            }
+            return dto;
+        }
+
+        public async Task<EventDto> CreateEventAsync(EventDto dto, Guid organizerId, string organizerName, string? organizerAvatar)
+        {
+            var entity = _mapper.Map<Event>(dto);
+            entity.OrganizerId = organizerId;
+            entity.OrganizerName = organizerName;
+            entity.OrganizerAvatar = organizerAvatar;
+            var created = await _eventRepository.AddAsync(entity);
             await _eventRepository.SaveChangesAsync();
-            return created;
+            return _mapper.Map<EventDto>(created);
         }
 
-        public async Task<Event?> UpdateEventAsync(Guid id, Event updatedEvent, Guid userId)
+        public async Task<EventDto?> UpdateEventAsync(Guid id, EventDto dto, Guid userId)
         {
             var existing = await _eventRepository.GetByIdAsync(id);
-            if (existing == null)
-                return null;
+            if (existing == null) return null;
+            if (existing.OrganizerId != userId)
+                throw new UnauthorizedAccessException("Only the organizer can update this event.");
 
-            //if (existing.OrganizerId != userId)
-            //    throw new UnauthorizedAccessException("Only the organizer can update this event.");
-
-            existing.Title = updatedEvent.Title;
-            existing.Description = updatedEvent.Description;
-            existing.Location = updatedEvent.Location;
-            existing.StartTime = updatedEvent.StartTime;
-            existing.EndTime = updatedEvent.EndTime;
-            existing.Capacity = updatedEvent.Capacity;
-            //existing.TagId = updatedEvent.TagId;
-
+            _mapper.Map(dto, existing);
+            existing.Id = id.ToString();
+            existing.OrganizerId = userId;
             _eventRepository.Update(existing);
             await _eventRepository.SaveChangesAsync();
-            return existing;
+            return _mapper.Map<EventDto>(existing);
         }
 
         public async Task<bool> DeleteEventAsync(Guid id, Guid userId)
         {
             var existing = await _eventRepository.GetByIdAsync(id);
-            if (existing == null)
-                return false;
-
-            //if (existing.OrganizerId != userId)
-            //    throw new UnauthorizedAccessException("Only the organizer can delete this event.");
+            if (existing == null) return false;
+            if (existing.OrganizerId != userId)
+                throw new UnauthorizedAccessException("Only the organizer can delete this event.");
 
             _eventRepository.Delete(existing);
             await _eventRepository.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<EventDto?> RegisterForEventAsync(Guid eventId, Guid userId)
+        {
+            // Placeholder: real registration logic would go here.
+            Registration registration = new Registration { EventId = eventId.ToString(), UserId = userId.ToString() };
+
+            try
+            {
+                await _registratoinRepository.AddAsync(registration);
+            }
+            catch
+            {
+                return null;
+            }
+
+            var entity = await _eventRepository.GetByIdAsync(eventId, e => e.Registrations);
+            if (entity == null) return null;
+            var dto = _mapper.Map<EventDto>(entity);
+            if (entity.Registrations.FirstOrDefault(r => r.UserId == userId.ToString()) != null)
+            {
+                dto.AmIMember = true;
+            }
+            return dto;
+        }
+
+        public async Task<EventDto?> CancelRegistrationAsync(Guid eventId, Guid userId)
+        {
+            Registration registration = new Registration { EventId = eventId.ToString(), UserId = userId.ToString() };
+
+            try
+            {
+                _registratoinRepository.Delete(registration);
+            }
+            catch
+            {
+                return null;
+            }
+
+            var entity = await _eventRepository.GetByIdAsync(eventId);
+            if (entity == null) return null;
+            var dto = _mapper.Map<EventDto>(entity);
+            dto.AmIMember = false;
+            return dto;
         }
     }
 }

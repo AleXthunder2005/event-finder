@@ -1,4 +1,6 @@
-﻿using EventFinder.Application.Interfaces;
+﻿using AutoMapper;
+using EventFinder.Application.DTOs;
+using EventFinder.Application.Interfaces;
 using EventFinder.Domain.Entities;
 
 namespace EventFinder.Application.Services
@@ -6,63 +8,75 @@ namespace EventFinder.Application.Services
     public class ReviewService : IReviewService
     {
         private readonly IRepository<Review> _reviewRepository;
+        private readonly IRepository<Event> _eventRepository;
+        private readonly IMapper _mapper;
 
-        public ReviewService(IRepository<Review> reviewRepository)
+        public ReviewService(IRepository<Review> reviewRepository, IRepository<Event> eventRepository, IMapper mapper)
         {
             _reviewRepository = reviewRepository;
+            _eventRepository = eventRepository;
+            _mapper = mapper;
         }
 
-        public async Task<IEnumerable<Review>> GetAllReviewsAsync()
+        public async Task<IEnumerable<ReviewDto>> GetAllReviewsAsync()
         {
-            return await _reviewRepository.GetAllAsync(
-                r => r.Organizer,
-                r => r.Author
-            );
+            var reviews = await _reviewRepository.GetAllAsync();
+            var reviewsDtos = _mapper.Map<IEnumerable<ReviewDto>>(reviews);
+            return reviewsDtos;
         }
 
-        public async Task<Review?> GetReviewByIdAsync(Guid id)
+        public async Task<ReviewDto?> GetReviewByIdAsync(Guid id)
         {
-            return await _reviewRepository.GetByIdAsync(id,
-                r => r.Organizer,
-                r => r.Author
-            );
+            var review = await _reviewRepository.GetByIdAsync(id);
+            return review == null ? null : _mapper.Map<ReviewDto>(review);
         }
 
-        public async Task<Review> CreateReviewAsync(Review review, Guid authorId)
+        public async Task<IEnumerable<ReviewDto>> GetReviewsByUserAsync(Guid userId)
         {
-            review.AuthorId = authorId;
-            review.CreatedAt = DateTime.UtcNow;
-            var created = await _reviewRepository.AddAsync(review);
+            var reviews = await _reviewRepository.GetAllAsync(r => r.UserId == userId.ToString());
+            return _mapper.Map<IEnumerable<ReviewDto>>(reviews);
+        }
+
+        public async Task<IEnumerable<ReviewDto>> GetReviewsByOrganizerAsync(Guid organizerId)
+        {
+            // Gathers reviews where the associated event's organizer matches
+            var events = await _eventRepository.GetAllAsync(e => e.OrganizerId == organizerId);
+            var eventIds = events.Select(e => e.Id).ToList();
+            var reviews = await _reviewRepository.GetAllAsync(r => eventIds.Contains(r.EventId.ToString()));
+            return _mapper.Map<IEnumerable<ReviewDto>>(reviews);
+        }
+
+        public async Task<ReviewDto> CreateReviewAsync(ReviewDto dto, Guid authorId, string authorName, string? authorAvatar)
+        {
+            var entity = _mapper.Map<Review>(dto);
+            //entity.UserId = authorId.ToString();
+            entity.Id = Guid.NewGuid().ToString();
+            var created = await _reviewRepository.AddAsync(entity);
             await _reviewRepository.SaveChangesAsync();
-            return created;
+            return _mapper.Map<ReviewDto>(created);
         }
 
-        public async Task<Review?> UpdateReviewAsync(Guid id, Review updatedReview, Guid userId)
+        public async Task<ReviewDto?> UpdateReviewAsync(Guid id, ReviewDto dto, Guid userId)
         {
             var existing = await _reviewRepository.GetByIdAsync(id);
-            if (existing == null)
-                return null;
-
-            if (existing.AuthorId != userId)
+            if (existing == null) return null;
+            if (existing.UserId != userId.ToString())
                 throw new UnauthorizedAccessException("Only the author can update this review.");
 
-            existing.Rating = updatedReview.Rating;
-            existing.Text = updatedReview.Text;
-            // CreatedAt не обновляем
-
+            _mapper.Map(dto, existing);
+            existing.Id = id.ToString();
+            existing.UserId = userId.ToString();
             _reviewRepository.Update(existing);
             await _reviewRepository.SaveChangesAsync();
-            return existing;
+            return _mapper.Map<ReviewDto>(existing);
         }
 
         public async Task<bool> DeleteReviewAsync(Guid id, Guid userId)
         {
             var existing = await _reviewRepository.GetByIdAsync(id);
-            if (existing == null)
-                return false;
-
-            //if (existing.AuthorId != userId)
-            //    throw new UnauthorizedAccessException("Only the author can delete this review.");
+            if (existing == null) return false;
+            if (existing.UserId != userId.ToString())
+                throw new UnauthorizedAccessException("Only the author can delete this review.");
 
             _reviewRepository.Delete(existing);
             await _reviewRepository.SaveChangesAsync();

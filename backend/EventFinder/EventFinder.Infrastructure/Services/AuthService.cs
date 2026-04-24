@@ -129,12 +129,14 @@ public class AuthService : IAuthService
         user.EmailVerifiedAtUtc = DateTime.UtcNow;
 
         var userProfile = new User();
+        userProfile.Email = user.Email!;
         await _userRepository.AddAsync(userProfile);
 
         user.UserProfileId = userProfile.Id;
         await _userManager.UpdateAsync(user);
 
         await _db.SaveChangesAsync(cancellationToken);
+        await _userRepository.SaveChangesAsync();
 
         return ServiceResult.Ok("Email успешно подтверждён.");
     }

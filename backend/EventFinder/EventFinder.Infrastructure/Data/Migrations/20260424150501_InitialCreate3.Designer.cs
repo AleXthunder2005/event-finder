@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EventFinder.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260410224939_InitialCreate3")]
+    [Migration("20260424150501_InitialCreate3")]
     partial class InitialCreate3
     {
         /// <inheritdoc />
@@ -78,26 +78,59 @@ namespace EventFinder.Infrastructure.Data.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("varchar(255)");
 
-                    b.Property<int>("Capacity")
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("AvailableSpots")
                         .HasColumnType("int");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.PrimitiveCollection<string>("Coordinates")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Date")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("datetime(6)");
+                    b.Property<string>("Image")
+                        .HasColumnType("longtext");
+
+                    b.PrimitiveCollection<string>("Images")
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime(6)");
+                    b.Property<string>("OrganizerAvatar")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("OrganizerId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("OrganizerName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Time")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<int?>("TotalSpots")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -152,31 +185,38 @@ namespace EventFinder.Infrastructure.Data.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("varchar(255)");
 
-                    b.Property<Guid>("AuthorId")
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("EventId")
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("AuthorId1")
+                    b.Property<string>("EventId1")
+                        .IsRequired()
                         .HasColumnType("varchar(255)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("OrganizerId")
                         .IsRequired()
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Rating")
                         .HasColumnType("int");
 
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("UserId1")
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AuthorId1");
+                    b.HasIndex("EventId1");
 
-                    b.HasIndex("OrganizerId");
+                    b.HasIndex("UserId1");
 
                     b.ToTable("Reviews");
                 });
@@ -196,28 +236,49 @@ namespace EventFinder.Infrastructure.Data.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("varchar(255)");
 
+                    b.Property<string>("Address")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Alias")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<string>("AvatarUrl")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Biography")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("CompanyName")
                         .HasColumnType("longtext");
 
+                    b.Property<double>("CoordinateX")
+                        .HasColumnType("double");
+
+                    b.Property<double>("CoordinateY")
+                        .HasColumnType("double");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("DisplayName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<DateTime>("LastLoginAt")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<int>("ReputationScore")
                         .HasColumnType("int");
 
                     b.Property<int>("Role")
                         .HasColumnType("int");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("VerifiedFlag")
                         .HasColumnType("tinyint(1)");
@@ -295,19 +356,19 @@ namespace EventFinder.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("EventFinder.Domain.Entities.Review", b =>
                 {
-                    b.HasOne("EventFinder.Domain.Entities.User", "Author")
+                    b.HasOne("EventFinder.Domain.Entities.Event", "Event")
                         .WithMany()
-                        .HasForeignKey("AuthorId1");
-
-                    b.HasOne("EventFinder.Domain.Entities.User", "Organizer")
-                        .WithMany()
-                        .HasForeignKey("OrganizerId")
+                        .HasForeignKey("EventId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Author");
+                    b.HasOne("EventFinder.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId1");
 
-                    b.Navigation("Organizer");
+                    b.Navigation("Event");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("EventFinder.Domain.Entities.Event", b =>

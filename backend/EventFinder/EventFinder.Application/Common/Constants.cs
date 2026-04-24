@@ -2,6 +2,6 @@
 {
     public static class Constants
     {
-        public const string ProfileIdClaimName = "ProfileId";
+        public const string ProfileIdClaimName = "profileId";
     }
 }

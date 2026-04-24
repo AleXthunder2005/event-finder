@@ -6,7 +6,21 @@ namespace EventFinder.Domain.Entities
     {
         public Role Role { get; set; }
 
-        public string DisplayName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+
+        public string UserName { get; set; } = string.Empty;
+
+        public string Alias { get; set; } = string.Empty;
+
+        public string Phone { get; set; } = string.Empty;
+
+        public string Biography { get; set; } = string.Empty;
+        
+        public double CoordinateX { get; set; }
+
+        public double CoordinateY { get; set; }
+
+        public string? Address { get; set; }
 
         public string AvatarUrl { get; set; } = string.Empty;
 

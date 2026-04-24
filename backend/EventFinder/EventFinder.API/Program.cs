@@ -1,4 +1,5 @@
 using EventFinder.Application.Interfaces;
+using EventFinder.Application.Mapping;
 using EventFinder.Application.Services;
 using EventFinder.Infrastructure.Data;
 using EventFinder.Infrastructure.Data.Repositories;
@@ -20,6 +21,8 @@ namespace EventFinder.API
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.AddAutoMapper(config =>
+                config.AddProfile<MappingProfile>());
 
             builder.Services.AddScoped(typeof(IRepository<>), typeof(RepositoryBase<>));
             builder.Services.AddScoped<IEventService, EventService>();
@@ -30,6 +33,7 @@ namespace EventFinder.API
             {
                 options.JsonSerializerOptions.Converters.Add(
                     new System.Text.Json.Serialization.JsonStringEnumConverter());
+                options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
             }); ;
 
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

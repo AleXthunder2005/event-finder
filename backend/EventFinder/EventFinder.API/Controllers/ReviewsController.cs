@@ -1,49 +1,73 @@
-﻿using EventFinder.Application.Interfaces;
+﻿using EventFinder.Application.DTOs;
+using EventFinder.Application.Interfaces;
 using EventFinder.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace EventFinder.API.Controllers
 {
-    public class ReviewsController : BaseApiController
+    [ApiController]
+    [Route("api/v1.0/[controller]")]
+    public class ReviewsController : ControllerBase
     {
         private readonly IReviewService _reviewService;
+        private Guid CurrentUserId => Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new UnauthorizedAccessException());
 
         public ReviewsController(IReviewService reviewService)
         {
             _reviewService = reviewService;
         }
+        [Authorize]
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Review>>> GetAll()
+        public async Task<ActionResult<IEnumerable<ReviewDto>>> GetAll()
         {
             var reviews = await _reviewService.GetAllReviewsAsync();
             return Ok(reviews);
         }
+        [Authorize]
 
-        [HttpGet("{id:Guid}")]
-        public async Task<ActionResult<Review>> GetById(Guid id)
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<ReviewDto>> GetById(Guid id)
         {
             var review = await _reviewService.GetReviewByIdAsync(id);
-            if (review == null)
-                return NotFound();
+            if (review == null) return NotFound();
             return Ok(review);
         }
+        [Authorize]
+
+        [HttpGet("user/{userId:guid}")]
+        public async Task<ActionResult<IEnumerable<ReviewDto>>> GetByUser(Guid userId)
+        {
+            var reviews = await _reviewService.GetReviewsByUserAsync(userId);
+            return Ok(reviews);
+        }
+        [Authorize]
+
+        [HttpGet("organizer/{organizerId:guid}")]
+        public async Task<ActionResult<IEnumerable<ReviewDto>>> GetByOrganizer(Guid organizerId)
+        {
+            var reviews = await _reviewService.GetReviewsByOrganizerAsync(organizerId);
+            return Ok(reviews);
+        }
+        [Authorize]
 
         [HttpPost]
-        public async Task<ActionResult<Review>> Create(Review review)
+        public async Task<ActionResult<ReviewDto>> Create(ReviewDto dto)
         {
-            var created = await _reviewService.CreateReviewAsync(review, Guid.Parse(UserId));
+            var created = await _reviewService.CreateReviewAsync(dto, CurrentUserId, "CurrentUserName", null);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
+        [Authorize]
 
-        [HttpPut("{id:Guid}")]
-        public async Task<ActionResult<Review>> Update(Guid id, Review updatedReview)
+        [HttpPut("{id:guid}")]
+        public async Task<ActionResult<ReviewDto>> Update(Guid id, ReviewDto dto)
         {
             try
             {
-                var result = await _reviewService.UpdateReviewAsync(id, updatedReview, Guid.Parse(UserId));
-                if (result == null)
-                    return NotFound();
+                var result = await _reviewService.UpdateReviewAsync(id, dto, CurrentUserId);
+                if (result == null) return NotFound();
                 return Ok(result);
             }
             catch (UnauthorizedAccessException)
@@ -51,15 +75,15 @@ namespace EventFinder.API.Controllers
                 return Forbid();
             }
         }
+        [Authorize]
 
-        [HttpDelete("{id:Guid}")]
+        [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {
             try
             {
-                var deleted = await _reviewService.DeleteReviewAsync(id, Guid.Parse(UserId));
-                if (!deleted)
-                    return NotFound();
+                var deleted = await _reviewService.DeleteReviewAsync(id, CurrentUserId);
+                if (!deleted) return NotFound();
                 return NoContent();
             }
             catch (UnauthorizedAccessException)

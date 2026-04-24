@@ -24,11 +24,29 @@ namespace EventFinder.Infrastructure.Data.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Description = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    Date = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Time = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     Location = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    StartTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    EndTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    Capacity = table.Column<int>(type: "int", nullable: false)
+                    Address = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Coordinates = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Category = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Image = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Images = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    OrganizerId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    OrganizerName = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    OrganizerAvatar = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    AvailableSpots = table.Column<int>(type: "int", nullable: true),
+                    TotalSpots = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -56,7 +74,17 @@ namespace EventFinder.Infrastructure.Data.Migrations
                     Id = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Role = table.Column<int>(type: "int", nullable: false),
-                    DisplayName = table.Column<string>(type: "longtext", nullable: false)
+                    UserName = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Alias = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Phone = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Biography = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CoordinateX = table.Column<double>(type: "double", nullable: false),
+                    CoordinateY = table.Column<double>(type: "double", nullable: false),
+                    Address = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     AvatarUrl = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -191,30 +219,33 @@ namespace EventFinder.Infrastructure.Data.Migrations
                 {
                     Id = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    OrganizerId = table.Column<string>(type: "varchar(255)", nullable: false)
+                    OrganizerId = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    AuthorId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AuthorId1 = table.Column<string>(type: "varchar(255)", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    EventId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    UserId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     Rating = table.Column<int>(type: "int", nullable: false),
-                    Text = table.Column<string>(type: "longtext", nullable: false)
+                    Comment = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    Date = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    EventId1 = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UserId1 = table.Column<string>(type: "varchar(255)", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Reviews", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Reviews_Users_AuthorId1",
-                        column: x => x.AuthorId1,
-                        principalTable: "Users",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Reviews_Users_OrganizerId",
-                        column: x => x.OrganizerId,
-                        principalTable: "Users",
+                        name: "FK_Reviews_Events_EventId1",
+                        column: x => x.EventId1,
+                        principalTable: "Events",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Reviews_Users_UserId1",
+                        column: x => x.UserId1,
+                        principalTable: "Users",
+                        principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -249,14 +280,14 @@ namespace EventFinder.Infrastructure.Data.Migrations
                 column: "EventId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Reviews_AuthorId1",
+                name: "IX_Reviews_EventId1",
                 table: "Reviews",
-                column: "AuthorId1");
+                column: "EventId1");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Reviews_OrganizerId",
+                name: "IX_Reviews_UserId1",
                 table: "Reviews",
-                column: "OrganizerId");
+                column: "UserId1");
         }
 
         /// <inheritdoc />
