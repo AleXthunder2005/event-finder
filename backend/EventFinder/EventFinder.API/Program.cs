@@ -16,7 +16,7 @@ namespace EventFinder.API
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public async static Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -94,6 +94,24 @@ namespace EventFinder.API
             });
 
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+
+                try
+                {
+                    var context = services.GetRequiredService<ApplicationDbContext>();
+                    await ApplicationDbContextSeed.SeedAsync(context, app.Logger);
+
+                    var identityContext = services.GetRequiredService<AppIdentityDbContext>();
+                    await AppIdentityDbContextSeed.SeedAsync(identityContext);
+                }
+                catch (Exception ex)
+                {
+                    app.Logger.LogError(ex, "An error occurred migrating the DB.");
+                }
+            }
 
             // Configure the HTTP request pipeline.
 
