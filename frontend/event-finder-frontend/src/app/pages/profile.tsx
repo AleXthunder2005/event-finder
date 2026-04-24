@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
-import { User, Calendar, MessageSquare, Settings, AlertTriangle, Loader2 } from "lucide-react";
+import { User, Calendar, MessageSquare, Settings, AlertTriangle, Loader2, Edit2, X, Check } from "lucide-react";
 import { Header } from "../components/header";
 import { Footer } from "../components/footer";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,13 +18,15 @@ import {
   AlertDialogTrigger,
 } from "../components/ui/alert-dialog";
 import { EventCard } from "../components/event-card";
-import { Map } from "@pbe/react-yandex-maps";
+import { Map, Placemark, SearchControl, useYMaps } from "@pbe/react-yandex-maps";
 import { useAuth } from "../context/AuthContext";
-import { profileService, ProfileData } from "../services/profileServise";
-import { reviewsService, UserReview } from "../services/reviewsService";
+import { profileService } from "../services/profileServise";
+import { reviewsService} from "../services/reviewsService";
 import { ReviewItem } from "../components/review-item";
 import { eventsService } from "../services/eventsService";
 import { EventEntity } from "../entities/event.types";
+import { ProfileEntity } from "../entities/profile.types";
+import {ReviewEntity} from "../entities/review.types";
 
 export function ProfilePage() {
   const { token, logout, userId } = useAuth();
@@ -34,18 +35,21 @@ export function ProfilePage() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [userReviews, setUserReviews] = useState<UserReview[]>([]);
+  const [profile, setProfile] = useState<ProfileEntity | null>(null);
+  const [userReviews, setUserReviews] = useState<ReviewEntity[]>([]);
   const [userEvents, setUserEvents] = useState<EventEntity[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [eventsLoading, setEventsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState<Omit<ProfileEntity, 'id' | 'email' | 'avatarUrl'>>({
+    userName: "",
+    alias: "",
     phone: "",
     biography: "",
+    coordinates: null,
+    address: null,
   });
+  const ymaps = useYMaps(["geocode"]);
 
   useEffect(() => {
     if (token && userId) {
@@ -56,6 +60,37 @@ export function ProfilePage() {
     }
   }, [token, userId]);
 
+  const handleMapClick = (e: any) => {
+    if (!isEditing) return;
+
+    const coords = e.get("coords");
+    if (coords) {
+      setFormData(prev => ({ ...prev, coordinates: coords }));
+    }
+
+    if (ymaps) {
+      ymaps
+          .geocode(coords)
+          .then((result: any) => {
+            const firstGeoObject = result.geoObjects.get(0);
+            if (firstGeoObject) {
+              const location = firstGeoObject.getLocalities().length > 0
+                  ? firstGeoObject.getLocalities()[0]
+                  : firstGeoObject.getAdministrativeAreas()[0] || "";
+
+              const route = firstGeoObject.getThoroughfare() || firstGeoObject.getPremiseName() || "";
+
+              const fullAddress = [location, route].filter(Boolean).join(", ");
+
+              setFormData(prev => ({ ...prev, address: fullAddress || null }));
+            }
+          })
+          .catch((err: any) => {
+            console.error("GEOCODE RESOLVING ERROR: " + err);
+          });
+    }
+  };
+
   const loadProfile = async () => {
     if (!token) return;
 
@@ -63,17 +98,19 @@ export function ProfilePage() {
     setError(null);
 
     try {
-      const userProfile = await profileService.getProfile(token);
+      const userProfile: ProfileEntity = await profileService.getProfile(token);
+
       setProfile(userProfile);
+
       setFormData({
-        firstName: userProfile.firstName,
-        lastName: userProfile.lastName,
-        email: userProfile.email,
+        userName: userProfile.userName,
+        alias: userProfile.alias,
         phone: userProfile.phone,
         biography: userProfile.biography,
+        coordinates: userProfile.coordinates || null,
+        address: userProfile.address || null,
       });
 
-      // Загружаем отзывы и мероприятия пользователя параллельно
       if (userId) {
         await Promise.all([
           loadUserReviews(),
@@ -124,22 +161,55 @@ export function ProfilePage() {
     setFormData(prev => ({ ...prev, [id]: value }));
   };
 
+  const handleEditProfile = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    if (profile) {
+      setFormData({
+        userName: profile.userName,
+        alias: profile.alias,
+        phone: profile.phone,
+        biography: profile.biography,
+        coordinates: profile.coordinates || null,
+        address: profile.address || null,
+      });
+    }
+    setIsEditing(false);
+  };
+
   const handleSaveProfile = async () => {
-    if (!token) return;
+    if (!token || !profile) return;
 
     setSaving(true);
     setError(null);
 
     try {
-      const updatedProfile = await profileService.updateProfile(token, {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
+      const updatedProfile: ProfileEntity = await profileService.updateProfile(token, {
+        id: profile.id,
+        userName: formData.userName,
+        alias: formData.alias,
+        email: profile.email,
         phone: formData.phone,
         biography: formData.biography,
+        coordinates: formData.coordinates,
+        address: formData.address,
+        avatarUrl: profile.avatarUrl,
       });
 
       setProfile(updatedProfile);
+
+      setFormData({
+        userName: updatedProfile.userName,
+        alias: updatedProfile.alias,
+        phone: updatedProfile.phone,
+        biography: updatedProfile.biography,
+        coordinates: formData.coordinates || updatedProfile.coordinates || null,
+        address: formData.address || updatedProfile.address || null,
+      });
+
+      setIsEditing(false);
       alert("Профиль успешно обновлен!");
     } catch (err: any) {
       console.error("Failed to update profile:", err);
@@ -168,6 +238,20 @@ export function ProfilePage() {
       }
     }
   };
+
+  const formatCoordinates = (coords: [number, number] | null | undefined): string => {
+    if (!coords || coords.length < 2) return "Координаты не заданы";
+    return `${coords[0].toFixed(6)}, ${coords[1].toFixed(6)}`;
+  };
+
+  const formatAddress = (address: string | null | undefined): string => {
+    if (!address) return "Адрес не задан";
+    return address;
+  };
+
+  // Получаем данные для отображения в зависимости от режима
+  const displayData = isEditing ? formData : profile || formData;
+  const mapCoordinates = isEditing ? formData.coordinates : profile?.coordinates;
 
   if (loading) {
     return (
@@ -198,16 +282,18 @@ export function ProfilePage() {
 
   return (
       <div className="min-h-screen flex flex-col">
-        <Header isAuthenticated={true} userName={profile.fullName} />
+        <Header isAuthenticated={true} userName={profile.userName} />
         <main className="flex-1 bg-muted/30">
           <div className="container mx-auto px-4 py-8">
-            <h1 className="mb-8">Профиль</h1>
+            <div className="flex justify-between items-center mb-8">
+              <h1 className="mb-0">Профиль</h1>
+            </div>
 
             {/* Mobile Tabs */}
             <div className="lg:hidden mb-8">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="personal">Личные данные</TabsTrigger>
+                  <TabsTrigger value="personal">Профиль</TabsTrigger>
                   <TabsTrigger value="events">Мероприятия</TabsTrigger>
                 </TabsList>
                 <TabsList className="grid w-full grid-cols-2">
@@ -229,7 +315,7 @@ export function ProfilePage() {
                         style={activeTab === "personal" ? { backgroundColor: 'var(--primary-color)' } : {}}
                     >
                       <User className="h-4 w-4 mr-2" />
-                      Личные данные
+                      Профиль
                     </Button>
                     <Button
                         variant={activeTab === "events" ? "default" : "ghost"}
@@ -307,34 +393,28 @@ export function ProfilePage() {
                   {activeTab === "personal" && (
                       <div className="space-y-6">
                         <div>
-                          <h2 className="mb-4">Личные данные</h2>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                          <Avatar className="h-20 w-20">
-                            <AvatarImage src={profile.avatarUrl} alt={profile.fullName} className="object-contain"/>
-                            <AvatarFallback>{profile.firstName[0]}</AvatarFallback>
-                          </Avatar>
-                          <Button variant="outline" className="hover:cursor-pointer">Изменить фото</Button>
+                          <h2 className="mb-4">Профиль</h2>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <Label htmlFor="firstName">Имя</Label>
+                            <Label htmlFor="userName">Имя пользователя</Label>
                             <Input
-                                id="firstName"
-                                value={formData.firstName}
+                                id="userName"
+                                value={formData.userName}
                                 onChange={handleInputChange}
-                                className="mt-2"
+                                className="mt-2 disabled:border-gray-300 disabled:bg-gray-50"
+                                disabled={!isEditing}
                             />
                           </div>
                           <div>
-                            <Label htmlFor="lastName">Фамилия</Label>
+                            <Label htmlFor="alias">Псевдоним</Label>
                             <Input
-                                id="lastName"
-                                value={formData.lastName}
+                                id="alias"
+                                value={formData.alias}
                                 onChange={handleInputChange}
-                                className="mt-2"
+                                className="mt-2 disabled:border-gray-300 disabled:bg-gray-50"
+                                disabled={!isEditing}
                             />
                           </div>
                           <div>
@@ -342,9 +422,8 @@ export function ProfilePage() {
                             <Input
                                 id="email"
                                 type="email"
-                                value={formData.email}
-                                onChange={handleInputChange}
-                                className="mt-2"
+                                value={profile.email}
+                                className="mt-2 disabled:border-gray-300 disabled:bg-gray-50"
                                 disabled
                             />
                           </div>
@@ -355,7 +434,8 @@ export function ProfilePage() {
                                 type="tel"
                                 value={formData.phone}
                                 onChange={handleInputChange}
-                                className="mt-2"
+                                className="mt-2 disabled:border-gray-300 disabled:bg-gray-50"
+                                disabled={!isEditing}
                             />
                           </div>
                         </div>
@@ -366,30 +446,84 @@ export function ProfilePage() {
                               id="biography"
                               value={formData.biography}
                               onChange={handleInputChange}
-                              className="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex w-full min-w-0 rounded-md border bg-input-background px-3 py-2 text-base transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive min-h-[100px] mt-2"
+                              className="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex w-full min-w-0 rounded-md border bg-input-background px-3 py-2 text-base transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive min-h-[100px] mt-2 disabled:border-gray-300 disabled:bg-gray-50"
                               placeholder="Расскажите о себе..."
+                              disabled={!isEditing}
                           />
                         </div>
 
                         <div>
-                          <Label htmlFor="location">Локация</Label>
-                          <div id="location" className="mt-2">
+                          <Label htmlFor="location" className="mb-2 block">Локация</Label>
+                          <div id="location">
                             <Map
                                 defaultState={{ center: [53.90, 27.58], zoom: 11 }}
                                 width="100%"
                                 height="400px"
-                            />
+                                onClick={handleMapClick}
+                                options={{ draggable: isEditing }}
+                            >
+                              {mapCoordinates && <Placemark geometry={mapCoordinates} />}
+                              <SearchControl options={{ float: "right" }} />
+                            </Map>
+                            {!isEditing && (
+                                <p className="text-sm text-muted-foreground mt-2 text-center">
+                                  Нажмите "Редактировать профиль" чтобы изменить локацию
+                                </p>
+                            )}
                           </div>
                         </div>
 
-                        <Button
-                            style={{ backgroundColor: 'var(--primary-color)'}}
-                            className="hover:cursor-pointer hover:opacity-90 w-full"
-                            onClick={handleSaveProfile}
-                            disabled={saving}
-                        >
-                          {saving ? "Сохранение..." : "Сохранить изменения"}
-                        </Button>
+                        {/* Отображение адреса и координат */}
+                        <div className="space-y-2 bg-muted/30 p-4 rounded-lg">
+                          <div>
+                            <Label className="text-sm font-semibold">Адрес</Label>
+                            <p className="mt-1 text-muted-foreground">
+                              {formatAddress(displayData.address)}
+                            </p>
+                          </div>
+                          <div>
+                            <Label className="text-sm font-semibold">Координаты</Label>
+                            <p className="mt-1 text-muted-foreground">
+                              {formatCoordinates(displayData.coordinates)}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Кнопки внизу */}
+                        {!isEditing ? (
+                            <Button
+                                onClick={handleEditProfile}
+                                style={{ backgroundColor: 'var(--primary-color)' }}
+                                className="hover:cursor-pointer hover:opacity-90 w-full"
+                            >
+                              <Edit2 className="h-4 w-4 mr-2" />
+                              Редактировать профиль
+                            </Button>
+                        ) : (
+                            <div className="flex gap-2">
+                              <Button
+                                  variant="outline"
+                                  onClick={handleCancelEdit}
+                                  className="hover:cursor-pointer flex-1"
+                              >
+                                <X className="h-4 w-4 mr-2" />
+                                Отмена
+                              </Button>
+                              <Button
+                                  onClick={handleSaveProfile}
+                                  disabled={saving}
+                                  style={{ backgroundColor: 'var(--primary-color)' }}
+                                  className="hover:cursor-pointer hover:opacity-90 flex-1"
+                              >
+                                {saving ? (
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                ) : (
+                                    <Check className="h-4 w-4 mr-2" />
+                                )}
+                                {saving ? "Сохранение..." : "Сохранить изменения"}
+                              </Button>
+                            </div>
+                        )}
                       </div>
                   )}
 

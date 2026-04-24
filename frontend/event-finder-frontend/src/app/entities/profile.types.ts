@@ -1,31 +1,11 @@
-export interface OrganizerEntity {
-    id: string;
-    name: string;
-    avatar: string;
-    logo: string;
-    description: string;
-    email: string;
-    website: string;
-    rating: number;
-    reviewCount: number;
-    followers: number;
-    eventsCount: number;
-    joinDate: string;
+export interface ProfileEntity {
+    id?: string;                    // ID пользователя
+    userName?: string;              // Имя пользователя (обязательное)
+    alias?: string;                 // Псевдоним (обязательное)
+    email: string;                 // Email (обязательное, уникальное)
+    phone?: string;                 // Телефон
+    biography?: string;             // Биография/О себе
+    coordinates?: [number, number] | null;  // Координаты [широта, долгота]
+    address?: string | null;       // Полный адрес (строка)
+    avatarUrl?: string;            // URL аватара
 }
-
-export interface UserEntity {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    biography: string;
-    avatarUrl: string;
-    location?: {
-        lat: number;
-        lng: number;
-    };
-    createdAt: string;
-    updatedAt: string;
-}
-

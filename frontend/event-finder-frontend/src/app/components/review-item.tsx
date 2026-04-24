@@ -4,9 +4,10 @@ import { ReviewEntity } from "../entities/review.types";
 
 interface ReviewItemProps {
   review: ReviewEntity;
+  onClick?: () => void;
 }
 
-export function ReviewItem({ review }: ReviewItemProps) {
+export function ReviewItem({ review, onClick }: ReviewItemProps) {
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }).map((_, i) => (
         <Star
@@ -28,11 +29,14 @@ export function ReviewItem({ review }: ReviewItemProps) {
   };
 
   return (
-      <div className="border rounded-lg p-4">
+      <div
+          className={`border rounded-lg p-4 ${onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
+          onClick={onClick}
+      >
         <div className="flex items-start gap-3">
           <Avatar>
             <AvatarImage src={review.userAvatar} alt={review.userName} />
-            <AvatarFallback>{review.userName[0]}</AvatarFallback>
+            <AvatarFallback>{review.userName?.[0] || "U"}</AvatarFallback>
           </Avatar>
           <div className="flex-1">
             <div className="flex items-center justify-between mb-2">

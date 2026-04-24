@@ -11,6 +11,7 @@ import { NotFoundPage } from "./pages/not-found";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import {YMaps} from "@pbe/react-yandex-maps";
 import {ResetPasswordPage} from "./pages/reset-password";
+import {YMAP_API_KEY} from "./config/YMapConfig";
 
 const PrivateHome = () => {
   const { isAuthenticated } = useAuth();
@@ -21,7 +22,7 @@ const PrivateHome = () => {
 
 export default function App() {
   return (
-      <YMaps>
+      <YMaps query={{apikey : YMAP_API_KEY}}>
           <AuthProvider>
             <BrowserRouter>
               <Routes>
@@ -29,7 +30,7 @@ export default function App() {
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/email-confirmation" element={<EmailConfirmation />} />
                 <Route path="/" element={<PrivateHome />} />
-                {/* <Route path="/events/:id" element={<EventDetailPage />} /> */}
+                 <Route path="/events/:id" element={<EventDetailPage />} />
                 {/* <Route path="/organizers/:id" element={<OrganizerPage />} /> */}
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />

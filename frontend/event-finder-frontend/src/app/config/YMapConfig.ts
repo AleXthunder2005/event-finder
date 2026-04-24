@@ -1,0 +1,1 @@
+export const YMAP_API_KEY = "9c5278ca-d9e9-465f-8b43-bcc246d33c5c"

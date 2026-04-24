@@ -1,9 +1,32 @@
 import { SERVER_URL } from "../config/serverConfig";
 import {UpdateUserData, User} from "../dtos/profile";
+import {ProfileEntity} from "../entities/profile.types";
+
+// Мок-данные для профиля
+const mockUser: ProfileEntity = {
+    id: "1",
+    userName: "Александр",
+    alias: "Иванов",
+    email: "alexander@example.com",
+    phone: "+375296559789",
+    biography: "Люблю путешествия, фотографию и активный отдых. Организую мероприятия для единомышленников.",
+    avatarUrl: "https://static.vecteezy.com/system/resources/previews/019/879/198/non_2x/user-icon-on-transparent-background-free-png.png",
+};
+
+function delay(ms: number = 500): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
 
 // GET /api/users/{id} - Получить пользователя по ID
-export async function getUserById(userId: string, token: string): Promise<User> {
-    const response = await fetch(`${SERVER_URL}/api/users/${userId}`, {
+export async function getUserById(userId: string, token: string): Promise<ProfileEntity> {
+
+    await delay(500);
+    return mockUser;
+
+
+    /*    const response = await fetch(`${SERVER_URL}/api/users/${userId}`, {
         method: "GET",
         headers: {
             "Authorization": `Bearer ${token}`,
@@ -18,11 +41,11 @@ export async function getUserById(userId: string, token: string): Promise<User> 
         throw error;
     }
 
-    return await response.json();
+    return await response.json();*/
 }
 
 // GET /api/users - Получить список всех пользователей
-export async function getUsers(token: string): Promise<User[]> {
+export async function getUsers(token: string): Promise<ProfileEntity[]> {
     const response = await fetch(`${SERVER_URL}/api/users`, {
         method: "GET",
         headers: {
@@ -42,8 +65,13 @@ export async function getUsers(token: string): Promise<User[]> {
 }
 
 // PUT /api/users/{id} - Обновить данные пользователя
-export async function updateUser(userId: string, userData: UpdateUserData, token: string): Promise<User> {
-    const response = await fetch(`${SERVER_URL}/api/users/${userId}`, {
+export async function updateUser(userId: string, userData: ProfileEntity, token: string): Promise<ProfileEntity> {
+
+    await delay(500);
+    return userData;
+
+
+    /*    const response = await fetch(`${SERVER_URL}/api/users/${userId}`, {
         method: "PUT",
         headers: {
             "Authorization": `Bearer ${token}`,
@@ -59,7 +87,7 @@ export async function updateUser(userId: string, userData: UpdateUserData, token
         throw error;
     }
 
-    return await response.json();
+    return await response.json();*/
 }
 
 // DELETE /api/users/{id} - Удалить пользователя

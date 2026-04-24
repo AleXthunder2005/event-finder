@@ -1,6 +1,8 @@
+import {EventEntity} from "../entities/event.types";
+import {ReviewEntity} from "../entities/review.types";
 
 
-export const mockEvents: any[] = [
+export const mockEvents: EventEntity[] = [
   {
     id: "1",
     title: "Мастер-класс по фотографии",
@@ -19,7 +21,8 @@ export const mockEvents: any[] = [
     organizerAvatar: "https://images.unsplash.com/photo-1760780567530-389d8a3fba75?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjcmVhdGl2ZSUyMHN0dWRpbyUyMHdvcmtzcGFjZXxlbnwxfHx8fDE3NzMzNjEzMzJ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
     availableSpots: 8,
     totalSpots: 15,
-    coordinates: { lat: 55.751244, lng: 37.618423 }
+    coordinates: [55.751244, 37.618423],
+    amIMember: true,
   },
   {
     id: "2",
@@ -39,7 +42,8 @@ export const mockEvents: any[] = [
     organizerAvatar: "https://images.unsplash.com/photo-1772587002840-30b82d74fbf5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnYW1pbmclMjBldmVudCUyMGNvbW11bml0eXxlbnwxfHx8fDE3NzM0MDY0NDd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
     availableSpots: 12,
     totalSpots: 20,
-    coordinates: { lat: 55.755826, lng: 37.617300 }
+    coordinates: [55.751244, 37.618423],
+    amIMember: true,
   },
   {
     id: "3",
@@ -59,7 +63,8 @@ export const mockEvents: any[] = [
     organizerAvatar: "https://images.unsplash.com/photo-1667890785988-8da12fd0989b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx5b2dhJTIwaW5zdHJ1Y3RvciUyMG1lZGl0YXRpb258ZW58MXx8fHwxNzczMzY5MTcyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
     availableSpots: 15,
     totalSpots: 25,
-    coordinates: { lat: 55.752220, lng: 37.615560 }
+    coordinates: [55.751244, 37.618423],
+    amIMember: true,
   },
   {
     id: "4",
@@ -79,7 +84,8 @@ export const mockEvents: any[] = [
     organizerAvatar: "https://images.unsplash.com/photo-1760780567530-389d8a3fba75?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjcmVhdGl2ZSUyMHN0dWRpbyUyMHdvcmtzcGFjZXxlbnwxfHx8fDE3NzMzNjEzMzJ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
     availableSpots: 30,
     totalSpots: 50,
-    coordinates: { lat: 55.758220, lng: 37.612560 }
+    coordinates: [55.751244, 37.618423],
+    amIMember: false,
   },
   {
     id: "5",
@@ -99,7 +105,8 @@ export const mockEvents: any[] = [
     organizerAvatar: "https://images.unsplash.com/photo-1772587002840-30b82d74fbf5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnYW1pbmclMjBldmVudCUyMGNvbW11bml0eXxlbnwxfHx8fDE3NzM0MDY0NDd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
     availableSpots: 5,
     totalSpots: 10,
-    coordinates: { lat: 55.748220, lng: 37.625560 }
+    coordinates: [55.751244, 37.618423],
+    amIMember: true,
   },
   {
     id: "6",
@@ -119,7 +126,8 @@ export const mockEvents: any[] = [
     organizerAvatar: "https://images.unsplash.com/photo-1667890785988-8da12fd0989b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx5b2dhJTIwaW5zdHJ1Y3RvciUyMG1lZGl0YXRpb258ZW58MXx8fHwxNzczMzY5MTcyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
     availableSpots: 20,
     totalSpots: 40,
-    coordinates: { lat: 55.742220, lng: 37.635560 }
+    coordinates: [55.751244, 37.618423],
+    amIMember: false,
   }
 ];
 
@@ -168,9 +176,10 @@ export const mockOrganizers: any[] = [
   }
 ];
 
-export const mockReviews: any[] = [
+export const mockReviews: ReviewEntity[] = [
   {
     id: "1",
+    eventId: "2",
     userId: "u1",
     userName: "Анна Смирнова",
     userAvatar: "https://images.unsplash.com/photo-1712168567852-ea607c2d3177?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXJzb24lMjBhdmF0YXIlMjBwb3J0cmFpdCUyMHByb2Zlc3Npb25hbHxlbnwxfHx8fDE3NzM0MDY0NDd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
@@ -180,6 +189,7 @@ export const mockReviews: any[] = [
   },
   {
     id: "2",
+    eventId: "1",
     userId: "u2",
     userName: "Дмитрий Петров",
     userAvatar: "https://images.unsplash.com/photo-1712168567852-ea607c2d3177?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXJzb24lMjBhdmF0YXIlMjBwb3J0cmFpdCUyMHByb2Zlc3Npb25hbHxlbnwxfHx8fDE3NzM0MDY0NDd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
@@ -189,6 +199,7 @@ export const mockReviews: any[] = [
   },
   {
     id: "3",
+    eventId: "3",
     userId: "u3",
     userName: "Елена Волкова",
     userAvatar: "https://images.unsplash.com/photo-1712168567852-ea607c2d3177?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXJzb24lMjBhdmF0YXIlMjBwb3J0cmFpdCUyMHByb2Zlc3Npb25hbHxlbnwxfHx8fDE3NzM0MDY0NDd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
@@ -198,6 +209,7 @@ export const mockReviews: any[] = [
   },
   {
     id: "4",
+    eventId: "1",
     userId: "u4",
     userName: "Михаил Козлов",
     userAvatar: "https://images.unsplash.com/photo-1712168567852-ea607c2d3177?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXJzb24lMjBhdmF0YXIlMjBwb3J0cmFpdCUyMHByb2Zlc3Npb25hbHxlbnwxfHx8fDE3NzM0MDY0NDd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
