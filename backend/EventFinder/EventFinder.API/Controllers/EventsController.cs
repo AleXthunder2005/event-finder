@@ -1,4 +1,5 @@
-﻿using EventFinder.Application.DTOs;
+﻿using EventFinder.Application.Common;
+using EventFinder.Application.DTOs;
 using EventFinder.Application.Interfaces;
 using EventFinder.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -15,6 +16,7 @@ namespace EventFinder.API.Controllers
         private readonly IWebHostEnvironment _env;
 
         private Guid CurrentUserId => Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new UnauthorizedAccessException());
+        private Guid UserProfileId => Guid.Parse(User.FindFirst(Constants.ProfileIdClaimName)?.Value ?? throw new UnauthorizedAccessException());
 
         public EventsController(IEventService eventService, IWebHostEnvironment env)
         {
@@ -63,8 +65,7 @@ namespace EventFinder.API.Controllers
         [HttpPost]
         public async Task<ActionResult<EventDto>> Create(EventDto dto)
         {
-            // In a real app, you'd fetch the user's name and avatar from the profile
-            var created = await _eventService.CreateEventAsync(dto, CurrentUserId, "CurrentUserName", null);
+            var created = await _eventService.CreateEventAsync(dto, UserProfileId, "CurrentUserName", null);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
