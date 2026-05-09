@@ -155,6 +155,7 @@ public class AuthService : IAuthService
 
         var userProfile = new User();
         userProfile.Email = user.Email!;
+        userProfile.Id =  Guid.NewGuid().ToString();
         _logger.LogInformation("VerifyEmailAsync: creating user profile with email {Email}", userProfile.Email);
         await _userRepository.AddAsync(userProfile);
         _logger.LogInformation("VerifyEmailAsync: user profile added, Id={ProfileId}", userProfile.Id);
