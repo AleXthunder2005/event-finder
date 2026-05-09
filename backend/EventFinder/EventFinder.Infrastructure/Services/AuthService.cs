@@ -62,7 +62,7 @@ public class AuthService : IAuthService
             IsEmailVerified = false
         };
 
-        var createResult = await _userManager.CreateAsync(user, request.Password);
+        /*var createResult = await _userManager.CreateAsync(user, request.Password);
         if (!createResult.Succeeded)
         {
             var message = string.Join("; ", createResult.Errors.Select(e => e.Description));
@@ -90,7 +90,7 @@ public class AuthService : IAuthService
 
         var verificationLink = $"{_appOptions.FrontendUrl.TrimEnd('/')}/email-confirmation?token={rawToken}";
 
-        /*try
+        try
         {
             _logger.LogInformation("RegisterAsync: sending verification email to {Email}", request.Email);
             await _emailSender.SendVerificationEmailAsync(request.Email, verificationLink, cancellationToken);
