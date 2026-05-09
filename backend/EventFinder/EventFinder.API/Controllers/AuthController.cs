@@ -42,7 +42,7 @@ namespace EventFinder.API.Controllers
         {
             _logger.LogInformation("Register called for email: {Email}", request.Email);
 
-            var result = await _authService.RegisterAsync(request, cancellationToken);
+            /*var result = await _authService.RegisterAsync(request, cancellationToken);
 
             if (!result.Success)
             {
@@ -52,7 +52,7 @@ namespace EventFinder.API.Controllers
                     return Conflict();
                 }
                 return BadRequest();
-            }
+            }*/
 
             _logger.LogInformation("Register succeeded for {Email}", request.Email);
             return Ok();
