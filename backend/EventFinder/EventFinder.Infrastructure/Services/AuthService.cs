@@ -62,7 +62,7 @@ public class AuthService : IAuthService
             IsEmailVerified = false
         };
 
-        /*var createResult = await _userManager.CreateAsync(user, request.Password);
+        var createResult = await _userManager.CreateAsync(user, request.Password);
         if (!createResult.Succeeded)
         {
             var message = string.Join("; ", createResult.Errors.Select(e => e.Description));
@@ -103,7 +103,7 @@ public class AuthService : IAuthService
             await _db.SaveChangesAsync(cancellationToken);
             await _userManager.DeleteAsync(user);
             return ServiceResult.MailSendFail("email_send_failed", "Не удалось отправить письмо подтверждения.");
-        }*/
+        }
 
         _logger.LogInformation("RegisterAsync completed successfully for {Email}", request.Email);
         return ServiceResult.Ok("Регистрация успешна. Проверьте email для подтверждения аккаунта.");
