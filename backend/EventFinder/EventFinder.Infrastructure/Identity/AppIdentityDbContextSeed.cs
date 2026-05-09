@@ -6,7 +6,7 @@ namespace EventFinder.Infrastructure.Identity
     {
         public static async Task SeedAsync(AppIdentityDbContext identityDbContext)
         {
-            if (identityDbContext.Database.IsMySql())
+            if (identityDbContext.Database.IsNpgsql())
             {
                 await identityDbContext.Database.MigrateAsync();
             }
