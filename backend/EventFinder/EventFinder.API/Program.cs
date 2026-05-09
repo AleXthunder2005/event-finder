@@ -38,16 +38,10 @@ namespace EventFinder.API
 
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseMySql(
-                    connectionString, 
-                    new MySqlServerVersion(new Version(8, 0, 42)))
-                );
+                options.UseNpgsql(connectionString));
 
             builder.Services.AddDbContext<AppIdentityDbContext>(options =>
-                options.UseMySql(
-                    connectionString,
-                    new MySqlServerVersion(new Version(8, 0, 42)))
-                   );
+                options.UseNpgsql(connectionString));
 
             builder.Services
                 .AddIdentity<ApplicationUser, IdentityRole>()
