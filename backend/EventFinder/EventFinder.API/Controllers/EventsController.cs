@@ -12,12 +12,14 @@ namespace EventFinder.API.Controllers
     public class EventsController : ControllerBase
     {
         private readonly IEventService _eventService;
+        private readonly IWebHostEnvironment _env;
 
         private Guid CurrentUserId => Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new UnauthorizedAccessException());
 
-        public EventsController(IEventService eventService)
+        public EventsController(IEventService eventService, IWebHostEnvironment env)
         {
             _eventService = eventService;
+            _env = env;
         }
 
         [Authorize]
@@ -116,6 +118,77 @@ namespace EventFinder.API.Controllers
             var result = await _eventService.CancelRegistrationAsync(id, CurrentUserId);
             if (result == null) return NotFound();
             return Ok(result);
+        }
+
+        [Authorize]
+        [HttpPost("{id:guid}/image")]
+        public async Task<ActionResult<EventDto>> UploadImage(Guid id, IFormFile file,
+            [FromServices] IWebHostEnvironment env)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("No file uploaded.");
+
+            // Allowed image extensions
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!allowedExtensions.Contains(extension))
+                return BadRequest("Invalid file type. Allowed: jpg, jpeg, png, gif, bmp.");
+
+            // Ensure wwwroot/exact path
+            var webRoot = env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            var uploadsFolder = Path.Combine(webRoot, "images", "events");
+            Directory.CreateDirectory(uploadsFolder);
+
+            var fileName = $"{Guid.NewGuid()}{extension}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var imageUrl = $"/images/events/{fileName}";
+
+            try
+            {
+                var result = await _eventService.SetEventImageAsync(id, CurrentUserId, imageUrl);
+                if (result == null) return NotFound();
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+        }
+
+        [Authorize]
+        [HttpGet("{id:guid}/image")]
+        public async Task<IActionResult> GetImage(Guid id)
+        {
+            var @event = await _eventService.GetEventByIdAsync(id);
+            if (@event == null || string.IsNullOrEmpty(@event.Image))
+                return NotFound();
+
+            var webRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            var fullPath = Path.Combine(webRoot, @event.Image.TrimStart('/'));
+
+            if (!System.IO.File.Exists(fullPath))
+                return NotFound();
+
+            var contentType = GetContentType(Path.GetExtension(fullPath));
+            return PhysicalFile(fullPath, contentType);
+        }
+
+        private string GetContentType(string extension)
+        {
+            return extension.ToLowerInvariant() switch
+            {
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".gif" => "image/gif",
+                ".bmp" => "image/bmp",
+                _ => "application/octet-stream",
+            };
         }
     }
 }

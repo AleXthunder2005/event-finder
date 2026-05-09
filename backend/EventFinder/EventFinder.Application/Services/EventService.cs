@@ -153,5 +153,19 @@ namespace EventFinder.Application.Services
             dto.AmIMember = false;
             return dto;
         }
+
+        public async Task<EventDto?> SetEventImageAsync(Guid eventId, Guid userId, string imageUrl)
+        {
+            var entity = await _eventRepository.GetByIdAsync(eventId);
+            if (entity == null) return null;
+            if (entity.OrganizerId != userId)
+                throw new UnauthorizedAccessException("Only the organizer can set the event image.");
+
+            entity.Image = imageUrl;
+            _eventRepository.Update(entity);
+            await _eventRepository.SaveChangesAsync();
+
+            return _mapper.Map<EventDto>(entity);
+        }
     }
 }

@@ -14,5 +14,6 @@ namespace EventFinder.Application.Interfaces
         Task<bool> DeleteEventAsync(Guid id, Guid userId);
         Task<EventDto?> RegisterForEventAsync(Guid eventId, Guid userId);
         Task<EventDto?> CancelRegistrationAsync(Guid eventId, Guid userId);
+        Task<EventDto?> SetEventImageAsync(Guid eventId, Guid userId, string imageUrl);
     }
 }
