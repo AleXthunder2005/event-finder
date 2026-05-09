@@ -10,7 +10,7 @@ import {
     cancelEventRegistration
 } from "../api/eventsApi";
 import { EventEntity } from "../entities/event.types";
-
+import { uploadEventImages } from "../api/eventsApi";
 
 class EventsService {
     private currentUserId: string | null = null;
@@ -96,6 +96,15 @@ class EventsService {
             return await cancelEventRegistration(eventId, token);
         } catch (error) {
             console.error("Error canceling event registration:", error);
+            throw error;
+        }
+    }
+
+    async uploadEventImages(eventId: string, images: File[], token: string): Promise<string[]> {
+        try {
+            return await uploadEventImages(eventId, images, token);
+        } catch (error) {
+            console.error("Error uploading event images:", error);
             throw error;
         }
     }

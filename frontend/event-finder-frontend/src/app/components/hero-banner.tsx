@@ -30,10 +30,9 @@ export function HeroBanner() {
           <Button
             asChild
             size="lg"
-            // variant="outline"
             className="bg-white text-gray-900 hover:bg-gray-100/80"
           >
-            <Link to="/organizers/org1">Стать организатором</Link>
+            <Link to="/profile">Стать организатором</Link>
           </Button>
         </div>
       </div>

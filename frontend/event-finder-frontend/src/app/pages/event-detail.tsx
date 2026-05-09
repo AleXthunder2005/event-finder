@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Calendar, Clock, MapPin, Users, Star, Loader2, Send, X } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Loader2, Send, X } from "lucide-react";
 import { Header } from "../components/header";
 import { Footer } from "../components/footer";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
-import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { EventCard } from "../components/event-card";
@@ -20,11 +19,13 @@ import { profileService } from "../services/profileServise";
 import { EventEntity } from "../entities/event.types";
 import { ReviewEntity } from "../entities/review.types";
 import { ProfileEntity } from "../entities/profile.types";
+import { DEFAULT_EVENT_IMAGE } from "../constants/defaultConstants";
+import { showSuccess, showError, showInfo } from "../helpers/toastUtils";
 
 export function EventDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { token, userId } = useAuth();
+  const { token, userId, userName } = useAuth();
   const [event, setEvent] = useState<EventEntity | null>(null);
   const [organizerEvents, setOrganizerEvents] = useState<EventEntity[]>([]);
   const [reviews, setReviews] = useState<ReviewEntity[]>([]);
@@ -34,7 +35,6 @@ export function EventDetailPage() {
   const [cancelling, setCancelling] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
 
-  // Review form state
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
@@ -70,17 +70,14 @@ export function EventDetailPage() {
       const eventData = await eventsService.getEventById(id, token);
       setEvent(eventData);
 
-      // Проверяем, зарегистрирован ли пользователь
       if (userId) {
         const userEvents = await eventsService.getUserRegisteredEvents(token);
         setIsRegistered(userEvents.some(e => e.id === eventData.id));
       }
 
-      // Load other events from same organizer
       const organizerEventsData = await eventsService.getEventsByOrganizer(eventData.organizerId, token);
       setOrganizerEvents(organizerEventsData.filter(e => e.id !== eventData.id).slice(0, 3));
 
-      // Load reviews for organizer
       const organizerReviews = await reviewsService.getReviewsByOrganizer(eventData.organizerId, token);
       setReviews(organizerReviews.slice(0, 3));
     } catch (err: any) {
@@ -101,16 +98,16 @@ export function EventDetailPage() {
     setRegistering(true);
     try {
       await eventsService.registerForEvent(id, token);
-      await loadEventData(); // Reload event data to update spots
-      alert("Вы успешно записались на мероприятие!");
+      await loadEventData();
+      showSuccess("Вы успешно записались на мероприятие!");
     } catch (err: any) {
       console.error("Failed to register for event:", err);
       if (err.status === 400) {
-        alert("Нет свободных мест");
+        showError("Нет свободных мест");
       } else if (err.status === 409) {
-        alert("Вы уже записаны на это мероприятие");
+        showInfo("Вы уже записаны на это мероприятие");
       } else {
-        alert("Не удалось записаться на мероприятие");
+        showError("Не удалось записаться на мероприятие");
       }
     } finally {
       setRegistering(false);
@@ -123,11 +120,11 @@ export function EventDetailPage() {
     setCancelling(true);
     try {
       await eventsService.cancelEventRegistration(id, token);
-      await loadEventData(); // Reload event data to update spots
-      alert("Вы успешно отменили запись на мероприятие");
+      await loadEventData();
+      showSuccess("Вы успешно отменили запись на мероприятие");
     } catch (err: any) {
       console.error("Failed to cancel registration:", err);
-      alert("Не удалось отменить запись");
+      showError("Не удалось отменить запись");
     } finally {
       setCancelling(false);
     }
@@ -137,7 +134,7 @@ export function EventDetailPage() {
     if (!token || !userId || !event || !userProfile) return;
 
     if (!reviewComment.trim()) {
-      alert("Пожалуйста, напишите комментарий");
+      showError("Пожалуйста, напишите комментарий");
       return;
     }
 
@@ -155,15 +152,14 @@ export function EventDetailPage() {
 
       await reviewsService.createReview(newReview, token);
 
-      // Reset form and reload reviews
       setReviewRating(5);
       setReviewComment("");
       setShowReviewForm(false);
-      await loadEventData(); // Reload to get updated reviews
-      alert("Отзыв успешно добавлен!");
+      await loadEventData();
+      showSuccess("Отзыв успешно добавлен!");
     } catch (err: any) {
       console.error("Failed to submit review:", err);
-      alert("Не удалось отправить отзыв");
+      showError("Не удалось отправить отзыв");
     } finally {
       setSubmittingReview(false);
     }
@@ -197,7 +193,7 @@ export function EventDetailPage() {
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <h2 className="mb-4">{error || "Мероприятие не найдено"}</h2>
-              <Button asChild className="mt-4">
+              <Button asChild className="mt-4 cursor-pointer hover:opacity-90">
                 <Link to="/">На главную</Link>
               </Button>
             </div>
@@ -212,10 +208,9 @@ export function EventDetailPage() {
 
   return (
       <div className="min-h-screen flex flex-col">
-        <Header isAuthenticated={true} userName="Пользователь" />
+        <Header isAuthenticated={true} userName={userName || "Пользователь"} />
         <main className="flex-1">
           <div className="container mx-auto px-4 py-8">
-            {/* Event Header */}
             <div className="mb-8">
               <div className="flex items-center gap-2 mb-4">
                 <Badge style={{ backgroundColor: 'var(--primary-color)' }}>
@@ -226,24 +221,20 @@ export function EventDetailPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Main Content */}
               <div className="lg:col-span-2 space-y-8">
-                {/* Gallery */}
                 <div className="rounded-lg overflow-hidden">
                   <img
-                      src={event.image || "/placeholder-event.jpg"}
+                      src={event.image || DEFAULT_EVENT_IMAGE}
                       alt={event.title}
                       className="w-full h-96 object-cover"
                   />
                 </div>
 
-                {/* Description */}
                 <div>
                   <h2 className="mb-4">Описание</h2>
                   <p className="text-muted-foreground leading-relaxed">{event.description}</p>
                 </div>
 
-                {/* Location Map with Yandex Maps */}
                 <div>
                   <h2 className="mb-4">Место проведения</h2>
                   <div className="rounded-lg overflow-hidden border">
@@ -273,7 +264,6 @@ export function EventDetailPage() {
                   </div>
                 </div>
 
-                {/* Other Events from Organizer */}
                 {organizerEvents.length > 0 && (
                     <div>
                       <h2 className="mb-4">Другие мероприятия этого организатора</h2>
@@ -285,7 +275,6 @@ export function EventDetailPage() {
                     </div>
                 )}
 
-                {/* Reviews Section */}
                 <div>
                   <div className="flex justify-between items-center mb-4">
                     <h2>Отзывы об организаторе</h2>
@@ -293,13 +282,13 @@ export function EventDetailPage() {
                         <Button
                             variant="outline"
                             onClick={() => setShowReviewForm(true)}
+                            className="cursor-pointer hover:bg-gray-100"
                         >
                           Написать отзыв
                         </Button>
                     )}
                   </div>
 
-                  {/* Review Form */}
                   {showReviewForm && (
                       <div className="border rounded-lg p-6 mb-6 bg-muted/30">
                         <div className="flex justify-between items-center mb-4">
@@ -308,6 +297,7 @@ export function EventDetailPage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => setShowReviewForm(false)}
+                              className="cursor-pointer hover:bg-gray-100"
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -342,6 +332,7 @@ export function EventDetailPage() {
                             <Button
                                 variant="outline"
                                 onClick={() => setShowReviewForm(false)}
+                                className="cursor-pointer hover:bg-gray-100"
                             >
                               Отмена
                             </Button>
@@ -349,6 +340,7 @@ export function EventDetailPage() {
                                 onClick={handleSubmitReview}
                                 disabled={submittingReview || !reviewComment.trim()}
                                 style={{ backgroundColor: 'var(--primary-color)' }}
+                                className="cursor-pointer hover:opacity-90"
                             >
                               {submittingReview ? (
                                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -362,7 +354,6 @@ export function EventDetailPage() {
                       </div>
                   )}
 
-                  {/* Reviews List */}
                   <div className="space-y-4">
                     {reviews.map((review) => (
                         <ReviewItem
@@ -380,10 +371,8 @@ export function EventDetailPage() {
                 </div>
               </div>
 
-              {/* Sidebar */}
               <div className="lg:col-span-1">
                 <div className="sticky top-20 space-y-6">
-                  {/* Event Info Card */}
                   <div className="border rounded-lg p-6 space-y-4">
                     <div className="flex items-center gap-3">
                       <Calendar className="h-5 w-5 text-muted-foreground" />
@@ -433,7 +422,7 @@ export function EventDetailPage() {
                         <>
                           {!isRegistered ? (
                               <Button
-                                  className="w-full"
+                                  className="w-full cursor-pointer hover:opacity-90"
                                   size="lg"
                                   style={{ backgroundColor: 'var(--primary-color)' }}
                                   onClick={handleRegister}
@@ -449,7 +438,7 @@ export function EventDetailPage() {
                               </Button>
                           ) : (
                               <Button
-                                  className="w-full"
+                                  className="w-full cursor-pointer hover:bg-destructive/90"
                                   size="lg"
                                   variant="destructive"
                                   onClick={handleCancelRegistration}
@@ -467,7 +456,7 @@ export function EventDetailPage() {
 
                     {isOrganizer && (
                         <Button
-                            className="w-full"
+                            className="w-full cursor-pointer hover:bg-gray-100"
                             size="lg"
                             variant="outline"
                             onClick={() => navigate(`/events/${event.id}/edit`)}
@@ -477,10 +466,9 @@ export function EventDetailPage() {
                     )}
                   </div>
 
-                  {/* Organizer Card */}
                   <Link
                       to={`/organizers/${event.organizerId}`}
-                      className="block border rounded-lg p-6 hover:shadow-lg transition-shadow"
+                      className="block border rounded-lg p-6 hover:shadow-lg hover:bg-gray-50 transition-all cursor-pointer"
                   >
                     <h3 className="mb-4">Организатор</h3>
                     <div className="flex items-center gap-3 mb-3">
