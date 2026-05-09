@@ -13,6 +13,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { eventsService } from "../services/eventsService";
 import { EventEntity } from '../entities/event.types'
+import { showError } from "../helpers/toastUtils";
 
 export function EventFeed() {
   const { token } = useAuth();
@@ -25,8 +26,7 @@ export function EventFeed() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Get unique cities and categories from events
-  const cities = [...new Set(allEvents.map(event => event.location.split(',')[0]?.trim() || event.location))];
+  const cities = [...new Set(allEvents.map(event => event.address?.split(',')[0]?.trim() || event.location))];
   const categories = [...new Set(allEvents.map(event => event.category))];
 
   useEffect(() => {
@@ -49,6 +49,7 @@ export function EventFeed() {
     } catch (err: any) {
       console.error("Failed to load events:", err);
       setError("Не удалось загрузить мероприятия");
+      showError("Не удалось загрузить мероприятия");
     } finally {
       setLoading(false);
     }
@@ -67,7 +68,7 @@ export function EventFeed() {
 
     if (selectedCity && selectedCity !== "Все города") {
       filtered = filtered.filter((event) =>
-          event.location.toLowerCase().includes(selectedCity.toLowerCase())
+          (event.address || event.location).toLowerCase().includes(selectedCity.toLowerCase())
       );
     }
 
@@ -105,7 +106,7 @@ export function EventFeed() {
             <h2 className="mb-8">Мероприятия</h2>
             <div className="text-center py-12">
               <p className="text-red-500 mb-4">{error}</p>
-              <Button onClick={loadEvents}>Попробовать снова</Button>
+              <Button onClick={loadEvents} className="cursor-pointer hover:opacity-90">Попробовать снова</Button>
             </div>
           </div>
         </section>
@@ -117,7 +118,6 @@ export function EventFeed() {
         <div className="container mx-auto px-4">
           <h2 className="mb-8">Мероприятия</h2>
 
-          {/* Filters */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <div className="md:col-span-2 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -130,13 +130,13 @@ export function EventFeed() {
             </div>
 
             <Select value={selectedCity} onValueChange={setSelectedCity}>
-              <SelectTrigger>
+              <SelectTrigger className="cursor-pointer">
                 <SelectValue placeholder="Город" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Все города">Все города</SelectItem>
+                <SelectItem value="Все города" className="cursor-pointer">Все города</SelectItem>
                 {cities.map((city) => (
-                    <SelectItem key={city} value={city}>
+                    <SelectItem key={city} value={city} className="cursor-pointer">
                       {city}
                     </SelectItem>
                 ))}
@@ -144,13 +144,13 @@ export function EventFeed() {
             </Select>
 
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger>
+              <SelectTrigger className="cursor-pointer">
                 <SelectValue placeholder="Категория" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Все категории">Все категории</SelectItem>
+                <SelectItem value="Все категории" className="cursor-pointer">Все категории</SelectItem>
                 {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
+                    <SelectItem key={category} value={category} className="cursor-pointer">
                       {category}
                     </SelectItem>
                 ))}
@@ -158,19 +158,18 @@ export function EventFeed() {
             </Select>
           </div>
 
-          {/* Events Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {displayedEvents.map((event) => (
                 <EventCard key={event.id} event={event} />
             ))}
           </div>
 
-          {/* Load More */}
           {displayedEvents.length < filteredEvents.length && (
               <div className="text-center">
                 <Button
                     onClick={loadMore}
                     size="lg"
+                    className="cursor-pointer hover:opacity-90"
                     style={{
                       backgroundColor: 'var(--primary-color)',
                       transition: 'var(--hover-button-transition)'

@@ -3,6 +3,7 @@ import { Calendar, Clock, MapPin } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { EventEntity } from '../entities/event.types'
+import { DEFAULT_EVENT_IMAGE } from '../constants/defaultConstants'
 
 interface EventCardProps {
   event: EventEntity;
@@ -18,13 +19,11 @@ export function EventCard({ event, compact = false }: EventCardProps) {
   return (
       <Link
           to={`/events/${event.id}`}
-          className="group block bg-card rounded-lg overflow-hidden border hover:shadow-lg transition-all duration-300"
-          style={{ transition: 'var(--hover-button-transition)' }}
+          className="group block bg-card rounded-lg overflow-hidden border hover:shadow-lg hover:bg-gray-50 transition-all duration-300 cursor-pointer"
       >
-        {/* Image */}
         <div className="relative overflow-hidden aspect-[16/9]">
           <img
-              src={event.image}
+              src={event.image || DEFAULT_EVENT_IMAGE}
               alt={event.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
@@ -36,7 +35,6 @@ export function EventCard({ event, compact = false }: EventCardProps) {
           </Badge>
         </div>
 
-        {/* Content */}
         <div className={compact ? "p-3 space-y-3" : "p-4 space-y-3"}>
           <h3 className={compact ? "text-base" : ""}>{event.title}</h3>
 
@@ -54,11 +52,10 @@ export function EventCard({ event, compact = false }: EventCardProps) {
             </div>
           </div>
 
-          {/* Organizer */}
           <div className="flex items-center gap-2 pt-2 border-t">
             <Avatar className="h-6 w-6">
               <AvatarImage src={event.organizerAvatar} alt={event.organizerName} />
-              <AvatarFallback>{event.organizerName[0]}</AvatarFallback>
+              <AvatarFallback>{event.organizerName?.[0] || "О"}</AvatarFallback>
             </Avatar>
             <span className="text-sm text-muted-foreground">{event.organizerName}</span>
           </div>
