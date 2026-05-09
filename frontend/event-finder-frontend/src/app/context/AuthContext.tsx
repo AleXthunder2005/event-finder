@@ -40,22 +40,17 @@ function decodeJWT(token: string): any {
 }
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [token, setToken] = useState<string | null>(null);
+    const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
     const [userName, setUserName] = useState("Гость");
     const [userId, setUserId] = useState<string | null>(null);
 
     useEffect(() => {
-/*        // Восстанавливаем токен из localStorage при загрузке
+//      Восстанавливаем токен из localStorage при загрузке
         const savedToken = localStorage.getItem("token");
+        console.log(savedToken);
         if (savedToken) {
             login(savedToken);
-        }*/
-
-        setToken("asd");
-        setUserId("aaaa");
-        profileService.setUserId("aaaa");
-        eventsService.setCurrentUserId("aaaa");
-        reviewsService.setCurrentUserId("aaaa");
+        }
 
     }, []);
 
@@ -69,6 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUserName(decoded.name || "Пользователь");
             setUserId(decoded.profileId);
             profileService.setUserId(decoded.profileId);
+            console.log(decoded.profileId);
             eventsService.setCurrentUserId(decoded.profileId);
             reviewsService.setCurrentUserId(decoded.profileId);
         }

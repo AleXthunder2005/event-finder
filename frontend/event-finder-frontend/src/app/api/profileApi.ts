@@ -21,12 +21,7 @@ function delay(ms: number = 500): Promise<void> {
 
 // GET /api/users/{id} - Получить пользователя по ID
 export async function getUserById(userId: string, token: string): Promise<ProfileEntity> {
-
-    await delay(500);
-    return mockUser;
-
-
-    /*    const response = await fetch(`${SERVER_URL}/api/users/${userId}`, {
+       const response = await fetch(`${SERVER_URL}/api/v1.0/users/${userId}`, {
         method: "GET",
         headers: {
             "Authorization": `Bearer ${token}`,
@@ -41,12 +36,12 @@ export async function getUserById(userId: string, token: string): Promise<Profil
         throw error;
     }
 
-    return await response.json();*/
+    return await response.json();
 }
 
 // GET /api/users - Получить список всех пользователей
 export async function getUsers(token: string): Promise<ProfileEntity[]> {
-    const response = await fetch(`${SERVER_URL}/api/users`, {
+    const response = await fetch(`${SERVER_URL}/api/v1.0/users`, {
         method: "GET",
         headers: {
             "Authorization": `Bearer ${token}`,
@@ -67,11 +62,8 @@ export async function getUsers(token: string): Promise<ProfileEntity[]> {
 // PUT /api/users/{id} - Обновить данные пользователя
 export async function updateUser(userId: string, userData: ProfileEntity, token: string): Promise<ProfileEntity> {
 
-    await delay(500);
-    return userData;
 
-
-    /*    const response = await fetch(`${SERVER_URL}/api/users/${userId}`, {
+    const response = await fetch(`${SERVER_URL}/api/v1.0/users/${userId}`, {
         method: "PUT",
         headers: {
             "Authorization": `Bearer ${token}`,
@@ -87,12 +79,12 @@ export async function updateUser(userId: string, userData: ProfileEntity, token:
         throw error;
     }
 
-    return await response.json();*/
+    return await response.json();
 }
 
 // DELETE /api/users/{id} - Удалить пользователя
 export async function deleteUser(userId: string, token: string, password: string): Promise<void> {
-    const response = await fetch(`${SERVER_URL}/api/users/${userId}`, {
+    const response = await fetch(`${SERVER_URL}/api/v1.0/users/${userId}`, {
         method: "DELETE",
         headers: {
             "Authorization": `Bearer ${token}`,

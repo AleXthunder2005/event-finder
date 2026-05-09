@@ -14,9 +14,9 @@ import {ResetPasswordPage} from "./pages/reset-password";
 import {YMAP_API_KEY} from "./config/YMapConfig";
 
 const PrivateHome = () => {
-  const { isAuthenticated } = useAuth();
+  const { token } = useAuth();
 
-  return isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />;
+  return token ? <HomePage /> : <Navigate to="/login" replace />;
   //return <HomePage/>;
 };
 
