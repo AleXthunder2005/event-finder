@@ -36,6 +36,13 @@ namespace EventFinder.API
                 options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
             }); ;
 
+            builder.Services.Configure<MailerSendOptions>(
+                builder.Configuration.GetSection("MailerSend"));
+
+            builder.Services.AddHttpClient();
+
+            builder.Services.AddScoped<IEmailSender, MailerSendEmailSender>();
+
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(connectionString));
@@ -51,12 +58,6 @@ namespace EventFinder.API
             builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
             builder.Services.Configure<AppOptions>(builder.Configuration.GetSection("App"));
 
-            builder.Services.Configure<BrevoOptions>(
-    builder.Configuration.GetSection("Brevo"));
-
-            builder.Services.AddHttpClient();
-
-            builder.Services.AddScoped<IEmailSender, BrevoEmailSender>();
 
             builder.Services.AddScoped<IAuthService, AuthService>();
 

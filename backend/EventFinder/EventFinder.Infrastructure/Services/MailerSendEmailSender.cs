@@ -7,29 +7,29 @@ using Microsoft.Extensions.Options;
 
 namespace EventFinder.Infrastructure.Services;
 
-public class BrevoEmailSender : IEmailSender
+public class MailerSendEmailSender : IEmailSender
 {
     private readonly HttpClient _httpClient;
-    private readonly BrevoOptions _options;
-    private readonly ILogger<BrevoEmailSender> _logger;
+    private readonly MailerSendOptions _options;
+    private readonly ILogger<MailerSendEmailSender> _logger;
 
-    public BrevoEmailSender(
+    public MailerSendEmailSender(
         HttpClient httpClient,
-        IOptions<BrevoOptions> options,
-        ILogger<BrevoEmailSender> logger)
+        IOptions<MailerSendOptions> options,
+        ILogger<MailerSendEmailSender> logger)
     {
         _httpClient = httpClient;
         _options = options.Value;
         _logger = logger;
 
         _httpClient.BaseAddress =
-            new Uri("https://api.brevo.com/v3/");
+            new Uri("https://api.mailersend.com/v1/");
 
-        if (!_httpClient.DefaultRequestHeaders.Contains("api-key"))
+        if (!_httpClient.DefaultRequestHeaders.Contains("Authorization"))
         {
             _httpClient.DefaultRequestHeaders.Add(
-                "api-key",
-                _options.ApiKey);
+                "Authorization",
+                $"Bearer {_options.ApiToken}");
         }
     }
 
@@ -42,7 +42,7 @@ public class BrevoEmailSender : IEmailSender
 
         var html =
 $"""
-<h2>Привет!</h2>
+<h2>Подтверждение email</h2>
 
 <p>
 Спасибо за регистрацию.
@@ -59,7 +59,7 @@ $"""
 </p>
 
 <p>
-Или используйте ссылку ниже:
+Или используйте ссылку:
 </p>
 
 <p>
@@ -104,7 +104,7 @@ $"""
 </p>
 
 <p>
-Или используйте ссылку ниже:
+Или используйте ссылку:
 </p>
 
 <p>
@@ -131,10 +131,10 @@ $"""
     {
         var payload = new
         {
-            sender = new
+            from = new
             {
-                name = _options.FromName,
-                email = _options.FromEmail
+                email = _options.FromEmail,
+                name = _options.FromName
             },
 
             to = new[]
@@ -147,7 +147,7 @@ $"""
 
             subject,
 
-            htmlContent = html
+            html
         };
 
         var json = JsonSerializer.Serialize(payload);
@@ -158,30 +158,31 @@ $"""
             "application/json");
 
         _logger.LogInformation(
-            "Sending email through Brevo to {Email}",
+            "Sending MailerSend email to {Email}",
             toEmail);
 
         using var response = await _httpClient.PostAsync(
-            "smtp/email",
+            "email",
             content,
             cancellationToken);
 
         var responseBody =
-            await response.Content.ReadAsStringAsync(cancellationToken);
+            await response.Content.ReadAsStringAsync(
+                cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
             _logger.LogError(
-                "Brevo email send failed. Status: {Status}. Response: {Response}",
+                "MailerSend send failed. Status: {Status}. Response: {Response}",
                 response.StatusCode,
                 responseBody);
 
             throw new Exception(
-                $"Brevo email send failed: {responseBody}");
+                $"MailerSend send failed: {responseBody}");
         }
 
         _logger.LogInformation(
-            "Email sent successfully to {Email}",
+            "MailerSend email sent successfully to {Email}",
             toEmail);
     }
 }
