@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import isEmailValid from "../helpers/isEmailValid";
 import { login as loginApi, forgotPassword } from "../api/authApi";
 import { useAuth } from "../context/AuthContext";
+import { showSuccess, showError } from "../utils/toastUtils";
 
 export const LoginPage = () => {
     const navigate = useNavigate();
@@ -43,7 +44,7 @@ export const LoginPage = () => {
         try {
             const data = await loginApi(email, password);
             login(data.token);
-            alert("Вы успешно вошли");
+            showSuccess("Вы успешно вошли");
             navigate("/");
         } catch (err: any) {
             switch (err.status) {
@@ -54,12 +55,12 @@ export const LoginPage = () => {
                     setPasswordError("Неверный пароль");
                     break;
                 case 403:
-                    alert("Email не подтверждён, пожалуйста подтвердите email");
+                    showError("Email не подтверждён, пожалуйста подтвердите email");
                     navigate("/email-confirmation");
                     break;
                 case 500:
                 default:
-                    alert("Ошибка сервера, попробуйте позже");
+                    showError("Ошибка сервера, попробуйте позже");
             }
         }
     };
@@ -189,7 +190,7 @@ export const LoginPage = () => {
 
             {/* MODAL OVERLAY */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black/40 bg-opacity-50 flex items-center justify-center z-50">
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
                     <div className="bg-white rounded-xl shadow-md p-6 w-[400px] relative">
                         {/* Close button */}
                         <button

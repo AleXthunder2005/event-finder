@@ -28,7 +28,7 @@ namespace EventFinder.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EventDto>>> GetAll()
         {
-            var events = await _eventService.GetAllEventsAsync(CurrentUserId);
+            var events = await _eventService.GetAllEventsAsync(UserProfileId);
             return Ok(events);
         }
 
@@ -37,7 +37,7 @@ namespace EventFinder.API.Controllers
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<EventDto>> GetById(Guid id)
         {
-            var @event = await _eventService.GetEventByIdAsync(id, CurrentUserId);
+            var @event = await _eventService.GetEventByIdAsync(id, UserProfileId);
             if (@event == null) return NotFound();
             return Ok(@event);
         }
@@ -56,7 +56,7 @@ namespace EventFinder.API.Controllers
         [HttpGet("user/registered")]
         public async Task<ActionResult<IEnumerable<EventDto>>> GetRegistered()
         {
-            var events = await _eventService.GetUserRegisteredEventsAsync(CurrentUserId);
+            var events = await _eventService.GetUserRegisteredEventsAsync(UserProfileId);
             return Ok(events);
         }
 
@@ -76,7 +76,7 @@ namespace EventFinder.API.Controllers
         {
             try
             {
-                var result = await _eventService.UpdateEventAsync(id, dto, CurrentUserId);
+                var result = await _eventService.UpdateEventAsync(id, dto, UserProfileId);
                 if (result == null) return NotFound();
                 return Ok(result);
             }
@@ -93,7 +93,7 @@ namespace EventFinder.API.Controllers
         {
             try
             {
-                var deleted = await _eventService.DeleteEventAsync(id, CurrentUserId);
+                var deleted = await _eventService.DeleteEventAsync(id, UserProfileId);
                 if (!deleted) return NotFound();
                 return NoContent();
             }
@@ -108,7 +108,7 @@ namespace EventFinder.API.Controllers
         [HttpPost("{id:guid}/register")]
         public async Task<ActionResult<EventDto>> Register(Guid id)
         {
-            var result = await _eventService.RegisterForEventAsync(id, CurrentUserId);
+            var result = await _eventService.RegisterForEventAsync(id, UserProfileId);
             if (result == null) return NotFound();
             return Ok(result);
         }
@@ -116,7 +116,7 @@ namespace EventFinder.API.Controllers
         [HttpDelete("{id:guid}/register")]
         public async Task<ActionResult<EventDto>> CancelRegistration(Guid id)
         {
-            var result = await _eventService.CancelRegistrationAsync(id, CurrentUserId);
+            var result = await _eventService.CancelRegistrationAsync(id, UserProfileId);
             if (result == null) return NotFound();
             return Ok(result);
         }
@@ -152,7 +152,7 @@ namespace EventFinder.API.Controllers
 
             try
             {
-                var result = await _eventService.SetEventImageAsync(id, CurrentUserId, imageUrl);
+                var result = await _eventService.SetEventImageAsync(id, UserProfileId, imageUrl);
                 if (result == null) return NotFound();
                 return Ok(result);
             }

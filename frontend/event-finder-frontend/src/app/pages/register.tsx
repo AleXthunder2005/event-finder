@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import isEmailValid from "../helpers/isEmailValid";
 import { register } from "../api/authApi";
+import { showSuccess, showError } from "../utils/toastUtils";
 
 export const RegisterPage = () => {
     const navigate = useNavigate();
@@ -56,17 +57,18 @@ export const RegisterPage = () => {
 
         try {
             await register(email, password);
-            alert("Регистрация прошла успешно!");
+            showSuccess("Регистрация прошла успешно! Теперь вы можете войти.");
+            navigate("/login");
         } catch (err: any) {
             switch (err.status) {
                 case 409:
                     setEmailError("Email уже занят");
                     break;
                 case 500:
-                    alert("Ошибка сервера, попробуйте позже");
+                    showError("Ошибка сервера, попробуйте позже");
                     break;
                 default:
-                    alert("Произошла ошибка");
+                    showError("Произошла ошибка при регистрации");
             }
         }
     };

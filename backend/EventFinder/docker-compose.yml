@@ -1,20 +1,20 @@
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: event_finder_mysql
+  postgres:
+    image: postgres:15
+    container_name: event_finder_postgres
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: event_finder_db
-      MYSQL_USER: event_finder_user
-      MYSQL_PASSWORD: event_finder_password
+      POSTGRES_DB: event_finder_db
+      POSTGRES_USER: event_finder_user
+      POSTGRES_PASSWORD: event_finder_password
     ports:
-      - "8006:3306"
+      - "5432:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 10s
+      test: ["CMD-SHELL", "pg_isready -U event_finder_user -d event_finder_db"]
+      interval: 10s
+      timeout: 5s
       retries: 5
 
   eventfinder-api:
@@ -23,13 +23,13 @@ services:
       dockerfile: ./EventFinder.API/Dockerfile
     container_name: eventfinder-api
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
     environment:
-      ConnectionStrings__DefaultConnection: "Server=mysql;Database=event_finder_db;User=event_finder_user;Password=event_finder_password;"
+      ConnectionStrings__DefaultConnection: "Host=postgres;Database=event_finder_db;Username=event_finder_user;Password=event_finder_password;"
     ports:
       - "8080:8080"
       - "8443:8443"
 
 volumes:
-  mysql_data:
+  postgres_data:
