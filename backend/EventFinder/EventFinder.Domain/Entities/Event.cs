@@ -12,7 +12,7 @@
         public string Category { get; set; } = null!;
         public string? Image { get; set; }
         public string[]? Images { get; set; }
-        public Guid OrganizerId { get; set; }
+        public string OrganizerId { get; set; }
         public string OrganizerName { get; set; } = null!;
         public string? OrganizerAvatar { get; set; }
         public int? AvailableSpots { get; set; }

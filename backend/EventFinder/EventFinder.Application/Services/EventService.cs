@@ -39,7 +39,7 @@ namespace EventFinder.Application.Services
 
         public async Task<IEnumerable<EventDto>> GetEventsByOrganizerAsync(Guid organizerId)
         {
-            var events = await _eventRepository.GetAllAsync(e => e.OrganizerId == organizerId);
+            var events = await _eventRepository.GetAllAsync(e => e.OrganizerId == organizerId.ToString());
             return _mapper.Map<IEnumerable<EventDto>>(events);
         }
 
@@ -75,7 +75,7 @@ namespace EventFinder.Application.Services
         public async Task<EventDto> CreateEventAsync(EventDto dto, Guid organizerId, string organizerName, string? organizerAvatar)
         {
             var entity = _mapper.Map<Event>(dto);
-            entity.OrganizerId = organizerId;
+            entity.OrganizerId = organizerId.ToString();
             entity.OrganizerName = organizerName;
             entity.OrganizerAvatar = organizerAvatar;
             var created = await _eventRepository.AddAsync(entity);
@@ -87,12 +87,12 @@ namespace EventFinder.Application.Services
         {
             var existing = await _eventRepository.GetByIdAsync(id);
             if (existing == null) return null;
-            if (existing.OrganizerId != userId)
+            if (existing.OrganizerId != userId.ToString())
                 throw new UnauthorizedAccessException("Only the organizer can update this event.");
 
             _mapper.Map(dto, existing);
             existing.Id = id.ToString();
-            existing.OrganizerId = userId;
+            existing.OrganizerId = userId.ToString();
             _eventRepository.Update(existing);
             await _eventRepository.SaveChangesAsync();
             return _mapper.Map<EventDto>(existing);
@@ -102,7 +102,7 @@ namespace EventFinder.Application.Services
         {
             var existing = await _eventRepository.GetByIdAsync(id);
             if (existing == null) return false;
-            if (existing.OrganizerId != userId)
+            if (existing.OrganizerId != userId.ToString())
                 throw new UnauthorizedAccessException("Only the organizer can delete this event.");
 
             _eventRepository.Delete(existing);
@@ -158,7 +158,7 @@ namespace EventFinder.Application.Services
         {
             var entity = await _eventRepository.GetByIdAsync(eventId);
             if (entity == null) return null;
-            if (entity.OrganizerId != userId)
+            if (entity.OrganizerId != userId.ToString())
                 throw new UnauthorizedAccessException("Only the organizer can set the event image.");
 
             entity.Image = imageUrl;

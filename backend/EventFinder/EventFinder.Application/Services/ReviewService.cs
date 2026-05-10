@@ -40,7 +40,7 @@ namespace EventFinder.Application.Services
         public async Task<IEnumerable<ReviewDto>> GetReviewsByOrganizerAsync(Guid organizerId)
         {
             // Gathers reviews where the associated event's organizer matches
-            var events = await _eventRepository.GetAllAsync(e => e.OrganizerId == organizerId);
+            var events = await _eventRepository.GetAllAsync(e => e.OrganizerId == organizerId.ToString());
             var eventIds = events.Select(e => e.Id).ToList();
             var reviews = await _reviewRepository.GetAllAsync(r => eventIds.Contains(r.EventId.ToString()));
             return _mapper.Map<IEnumerable<ReviewDto>>(reviews);
