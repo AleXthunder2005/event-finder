@@ -51,7 +51,13 @@ namespace EventFinder.API
             builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
             builder.Services.Configure<AppOptions>(builder.Configuration.GetSection("App"));
 
-            builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+            builder.Services.Configure<BrevoOptions>(
+    builder.Configuration.GetSection("Brevo"));
+
+            builder.Services.AddHttpClient();
+
+            builder.Services.AddScoped<IEmailSender, BrevoEmailSender>();
+
             builder.Services.AddScoped<IAuthService, AuthService>();
 
             var jwtOptions = builder.Configuration.GetSection("Jwt");

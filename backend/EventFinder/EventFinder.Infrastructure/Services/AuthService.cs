@@ -90,7 +90,7 @@ public class AuthService : IAuthService
 
         var verificationLink = $"{_appOptions.FrontendUrl.TrimEnd('/')}/email-confirmation?token={rawToken}";
 
-        /*try
+        try
         {
             _logger.LogInformation("RegisterAsync: sending verification email to {Email}", request.Email);
             await _emailSender.SendVerificationEmailAsync(request.Email, verificationLink, cancellationToken);
@@ -103,7 +103,7 @@ public class AuthService : IAuthService
             await _db.SaveChangesAsync(cancellationToken);
             await _userManager.DeleteAsync(user);
             return ServiceResult.MailSendFail("email_send_failed", "Не удалось отправить письмо подтверждения.");
-        }*/
+        }
 
         _logger.LogInformation("RegisterAsync completed successfully for {Email}", request.Email);
         return ServiceResult.Ok("Регистрация успешна. Проверьте email для подтверждения аккаунта.");
