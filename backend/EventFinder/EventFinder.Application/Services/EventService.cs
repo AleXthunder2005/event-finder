@@ -39,13 +39,15 @@ namespace EventFinder.Application.Services
 
         public async Task<IEnumerable<EventDto>> GetEventsByOrganizerAsync(Guid organizerId)
         {
-            var events = await _eventRepository.GetAllAsync(e => e.OrganizerId == organizerId.ToString());
+            var events = await _eventRepository.GetAllAsync();
+            events = events.Where(e => e.OrganizerId == organizerId.ToString());
             return _mapper.Map<IEnumerable<EventDto>>(events);
         }
 
         public async Task<IEnumerable<EventDto>> GetUserRegisteredEventsAsync(Guid userId)
         {
             var events = await _eventRepository.GetAllAsync(e => e.Registrations);
+            events = events.Where(e => e.Registrations.FirstOrDefault(r => r.UserId == userId.ToString()) != null);
             var dtos = new List<EventDto>();
 
             foreach (var @event in events)
@@ -118,6 +120,10 @@ namespace EventFinder.Application.Services
             try
             {
                 await _registratoinRepository.AddAsync(registration);
+                var currEvent = await _eventRepository.GetByIdAsync(eventId);
+                currEvent.AvailableSpots -= 1;
+                _eventRepository.Update(currEvent);
+                await _eventRepository.SaveChangesAsync();
             }
             catch
             {
@@ -129,6 +135,7 @@ namespace EventFinder.Application.Services
             var dto = _mapper.Map<EventDto>(entity);
             if (entity.Registrations.FirstOrDefault(r => r.UserId == userId.ToString()) != null)
             {
+                dto.AvailableSpots -= 1;
                 dto.AmIMember = true;
             }
             return dto;
@@ -141,6 +148,10 @@ namespace EventFinder.Application.Services
             try
             {
                 _registratoinRepository.Delete(registration);
+                var currEvent = await _eventRepository.GetByIdAsync(eventId);
+                currEvent.AvailableSpots += 1;
+                _eventRepository.Update(currEvent);
+                await _eventRepository.SaveChangesAsync();
             }
             catch
             {
@@ -151,6 +162,7 @@ namespace EventFinder.Application.Services
             if (entity == null) return null;
             var dto = _mapper.Map<EventDto>(entity);
             dto.AmIMember = false;
+            dto.AvailableSpots += 1;
             return dto;
         }
 
