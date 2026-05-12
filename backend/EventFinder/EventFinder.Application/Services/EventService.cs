@@ -135,7 +135,6 @@ namespace EventFinder.Application.Services
             var dto = _mapper.Map<EventDto>(entity);
             if (entity.Registrations.FirstOrDefault(r => r.UserId == userId.ToString()) != null)
             {
-                dto.AvailableSpots -= 1;
                 dto.AmIMember = true;
             }
             return dto;
@@ -143,7 +142,8 @@ namespace EventFinder.Application.Services
 
         public async Task<EventDto?> CancelRegistrationAsync(Guid eventId, Guid userId)
         {
-            Registration registration = new Registration { EventId = eventId.ToString(), UserId = userId.ToString() };
+            var registrations = await _registratoinRepository.GetAllAsync();
+            var registration = registrations.Where(r => r.EventId == eventId.ToString() && r.UserId == userId.ToString()).FirstOrDefault();
 
             try
             {
@@ -162,7 +162,6 @@ namespace EventFinder.Application.Services
             if (entity == null) return null;
             var dto = _mapper.Map<EventDto>(entity);
             dto.AmIMember = false;
-            dto.AvailableSpots += 1;
             return dto;
         }
 
